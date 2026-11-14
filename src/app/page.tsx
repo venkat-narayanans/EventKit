@@ -1,27 +1,46 @@
 "use client";
 
-import React from "react";
-import { useFestraStore } from "@/lib/store";
-import { ExploreView } from "@/components/views/ExploreView";
-import { FestDetailView } from "@/components/views/FestDetailView";
-import { PipelineView } from "@/components/views/PipelineView";
-import { JudgingStudioView } from "@/components/views/JudgingStudioView";
-import { LeaderboardView } from "@/components/views/LeaderboardView";
-import { CertificateStudioView } from "@/components/views/CertificateStudioView";
-import { NAACDossierView } from "@/components/views/NAACDossierView";
+import React, { useState } from "react";
+import { useStore } from "@/lib/store";
+import { Header } from "@/components/Header";
+import { CreateEventModal } from "@/components/organizer/CreateEventModal";
+import { EventsManager } from "@/components/organizer/EventsManager";
+import { SubmissionsManager } from "@/components/organizer/SubmissionsManager";
+import { JudgingRubricsStudio } from "@/components/organizer/JudgingRubricsStudio";
+import { LeaderboardManager } from "@/components/organizer/LeaderboardManager";
+import { CertificateDesigner } from "@/components/organizer/CertificateDesigner";
+import { ComplianceDossier } from "@/components/organizer/ComplianceDossier";
+import { StudentPortal } from "@/components/portal/StudentPortal";
 
 export default function HomePage() {
-  const { activeTab } = useFestraStore();
+  const { viewMode, activeSection } = useStore();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (
-    <div className="w-full">
-      {activeTab === "explore" && <ExploreView />}
-      {activeTab === "fest" && <FestDetailView />}
-      {activeTab === "pipeline" && <PipelineView />}
-      {activeTab === "judging" && <JudgingStudioView />}
-      {activeTab === "leaderboard" && <LeaderboardView />}
-      {activeTab === "certificates" && <CertificateStudioView />}
-      {activeTab === "naac" && <NAACDossierView />}
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans">
+      <Header onOpenCreateEvent={() => setIsCreateModalOpen(true)} />
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4">
+        {viewMode === "portal" ? (
+          <StudentPortal />
+        ) : (
+          <>
+            {activeSection === "events" && (
+              <EventsManager onOpenCreate={() => setIsCreateModalOpen(true)} />
+            )}
+            {activeSection === "submissions" && <SubmissionsManager />}
+            {activeSection === "judging" && <JudgingRubricsStudio />}
+            {activeSection === "leaderboard" && <LeaderboardManager />}
+            {activeSection === "certificates" && <CertificateDesigner />}
+            {activeSection === "compliance" && <ComplianceDossier />}
+          </>
+        )}
+      </main>
+
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 }
