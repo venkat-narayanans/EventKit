@@ -1,0 +1,31 @@
+name: Supabase Keep-Alive & Database Health Check
+
+on:
+  schedule:
+    # Runs every Monday and Thursday at 06:00 UTC
+    # Automatically resets the 7-day inactivity timer on Supabase Free Tier at zero cost
+    - cron: '0 6 * * 1,4'
+  workflow_dispatch: # Allows manual ping from the GitHub Actions tab anytime
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API Health Endpoint
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "Secrets not yet configured; skipping remote ping."
+            exit 0
+          fi
+          
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/?limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          
+          echo "Supabase Response Status Code: $STATUS"
+          if [ "$STATUS" -eq 200 ] || [ "$STATUS" -eq 404 ]; then
+            echo "✓ Successfully pinged Supabase! Inactivity timer reset."
+          else
+            echo "Ping received status code: $STATUS"
+          fi
