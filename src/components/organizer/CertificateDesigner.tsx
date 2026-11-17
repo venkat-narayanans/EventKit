@@ -98,13 +98,13 @@ export const CertificateDesigner: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-100 pb-4">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <Award className="h-4 w-4 text-devfolio-blue" />
+          <h2 className="font-fortnite text-2xl tracking-wide text-blue-950 uppercase flex items-center gap-2">
+            <Award className="h-5 w-5 text-blue-600" />
             BYOD Certificate Designer
           </h2>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-500 mt-0.5">
             Upload custom Canva artwork, calibrate dynamic fields, and generate cryptographically verifiable credentials.
           </p>
         </div>
@@ -120,18 +120,18 @@ export const CertificateDesigner: React.FC = () => {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#111114] px-3.5 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:border-white/[0.2] transition min-h-[36px]"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-white px-3.5 py-2 font-fortnite text-sm tracking-wide text-blue-900 hover:bg-blue-50 transition shadow-sm min-h-[36px]"
           >
             <Upload className="h-3.5 w-3.5" />
-            <span>Upload Artwork</span>
+            <span>UPLOAD ARTWORK</span>
           </button>
 
           <button
             onClick={handleDownloadSvg}
-            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-zinc-950 hover:bg-zinc-200 transition min-h-[36px] shadow-sm"
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition min-h-[36px] shadow-sm"
           >
             <Download className="h-3.5 w-3.5" />
-            <span>Download Vector SVG</span>
+            <span>DOWNLOAD VECTOR SVG</span>
           </button>
         </div>
       </div>
@@ -139,29 +139,29 @@ export const CertificateDesigner: React.FC = () => {
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* LEFT: Live Interactive Canvas framed in Stageshow macOS Window (7 Cols) */}
         <div className="lg:col-span-7 space-y-3">
-          <div className="flex items-center justify-between text-xs text-zinc-400">
-            <span className="font-semibold text-white">Interactive Vector Studio</span>
-            <span className="text-[11px] text-zinc-400">Click any label to calibrate position</span>
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span className="font-fortnite text-base text-blue-950 uppercase tracking-wide">Interactive Vector Studio</span>
+            <span className="text-[11px] text-slate-500">Click any label to calibrate position</span>
           </div>
 
           <Window
             chrome="native"
             title="Festra Vector Studio — 1920 × 1080 (300 DPI Edge Render)"
             lights="color"
-            className="w-full shadow-2xl rounded-2xl overflow-hidden border border-white/[0.08]"
+            className="w-full shadow-lg rounded-2xl overflow-hidden border border-slate-200"
           >
             <div
-              className="relative aspect-[16/10] w-full overflow-hidden bg-[#0c0c0e] select-none"
+              className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900 select-none"
               style={{
                 backgroundImage: certConfig.backgroundDataUrl
                   ? `url(${certConfig.backgroundDataUrl})`
-                  : "radial-gradient(circle at 50% 50%, #18181b 0%, #08080a 100%)",
+                  : "radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%)",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
               {!certConfig.backgroundDataUrl && (
-                <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-xl border border-white/[0.06]" />
+                <div className="pointer-events-none absolute inset-3 sm:inset-4 rounded-xl border border-blue-400/20" />
               )}
 
               {/* Canvas Dynamic Text Elements */}
@@ -190,8 +190,8 @@ export const CertificateDesigner: React.FC = () => {
                       }}
                       className={`cursor-pointer transition-all px-2 py-0.5 rounded whitespace-nowrap ${
                         isSelected
-                          ? "ring-2 ring-devfolio-blue ring-offset-2 ring-offset-[#08080a] bg-devfolio-blue/10"
-                          : "hover:bg-white/5"
+                          ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-slate-900 bg-blue-500/20"
+                          : "hover:bg-white/10"
                       }`}
                     >
                       {el.text}
@@ -207,10 +207,10 @@ export const CertificateDesigner: React.FC = () => {
                   top: "88%",
                   transform: "translate(-50%, -50%)",
                 }}
-                className="flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1 backdrop-blur-md border border-white/[0.08]"
+                className="flex items-center gap-2 rounded-lg bg-blue-950/80 px-2.5 py-1 backdrop-blur-md border border-blue-500/30 text-white"
               >
                 <QrCode className="h-4 w-4 text-white" />
-                <span className="font-mono text-[9px] text-zinc-300">
+                <span className="font-mono text-[9px] text-blue-200">
                   VERIFIED: CF-2026-8921 • SHA-256
                 </span>
               </div>
@@ -219,15 +219,15 @@ export const CertificateDesigner: React.FC = () => {
 
           {/* Quick Select Pill Strip */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1">
-            <span className="text-[11px] text-zinc-500 mr-1">Layer:</span>
+            <span className="text-[11px] text-slate-500 mr-1 font-medium">Layer:</span>
             {certConfig.elements.map((el) => (
               <button
                 key={el.id}
                 onClick={() => setSelectedElementId(el.id)}
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   el.id === selectedElementId
-                    ? "bg-white text-zinc-950 shadow-sm"
-                    : "border border-white/[0.08] bg-[#111114] text-zinc-400 hover:text-white"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-slate-600 hover:text-blue-900 hover:bg-slate-50"
                 }`}
               >
                 {el.label}
@@ -238,36 +238,36 @@ export const CertificateDesigner: React.FC = () => {
 
         {/* RIGHT: Typography & Positioning Calibration Inspector (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111114] p-5 space-y-4 shadow-luma-card">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <h3 className="font-bold text-white text-xs flex items-center gap-1.5">
-                <Sliders className="h-3.5 w-3.5 text-devfolio-blue" />
+          <div className="rounded-2xl border border-blue-100 bg-white p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-fortnite text-base text-blue-950 uppercase tracking-wide flex items-center gap-1.5">
+                <Sliders className="h-3.5 w-3.5 text-blue-600" />
                 <span>Element Inspector: {selectedElement.label}</span>
               </h3>
-              <span className="text-[10px] uppercase font-mono text-devfolio-blue font-bold">
+              <span className="text-[10px] uppercase font-fortnite text-blue-600">
                 {selectedElement.type}
               </span>
             </div>
 
             {/* Content Text Field */}
             <div className="space-y-1">
-              <label className="text-[11px] text-zinc-400 font-medium">Text Value / Variable</label>
+              <label className="text-[11px] text-slate-700 font-medium">Text Value / Variable</label>
               <input
                 type="text"
                 value={selectedElement.text}
                 onChange={(e) =>
                   updateCertElement(selectedElement.id, { text: e.target.value })
                 }
-                className="w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3.5 py-2 text-xs text-white focus:outline-none focus:border-devfolio-blue"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white"
               />
             </div>
 
             {/* Position Sliders */}
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] text-zinc-400">
+                <div className="flex justify-between text-[11px] text-slate-600">
                   <span>Horizontal (X)</span>
-                  <span className="font-mono text-white font-bold">{selectedElement.xPercent}%</span>
+                  <span className="font-fortnite text-blue-600 text-sm">{selectedElement.xPercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -279,14 +279,14 @@ export const CertificateDesigner: React.FC = () => {
                       xPercent: Number(e.target.value),
                     })
                   }
-                  className="w-full accent-devfolio-blue cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
+                  className="w-full accent-blue-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg"
                 />
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] text-zinc-400">
+                <div className="flex justify-between text-[11px] text-slate-600">
                   <span>Vertical (Y)</span>
-                  <span className="font-mono text-white font-bold">{selectedElement.yPercent}%</span>
+                  <span className="font-fortnite text-blue-600 text-sm">{selectedElement.yPercent}%</span>
                 </div>
                 <input
                   type="range"
@@ -298,7 +298,7 @@ export const CertificateDesigner: React.FC = () => {
                       yPercent: Number(e.target.value),
                     })
                   }
-                  className="w-full accent-devfolio-blue cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
+                  className="w-full accent-blue-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg"
                 />
               </div>
             </div>
@@ -306,9 +306,9 @@ export const CertificateDesigner: React.FC = () => {
             {/* Font Size & Weight */}
             <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] text-zinc-400">
+                <div className="flex justify-between text-[11px] text-slate-600">
                   <span>Font Size</span>
-                  <span className="font-mono text-white font-bold">{selectedElement.fontSize}px</span>
+                  <span className="font-fortnite text-blue-600 text-sm">{selectedElement.fontSize}px</span>
                 </div>
                 <input
                   type="range"
@@ -320,12 +320,12 @@ export const CertificateDesigner: React.FC = () => {
                       fontSize: Number(e.target.value),
                     })
                   }
-                  className="w-full accent-devfolio-blue cursor-pointer h-1.5 bg-zinc-800 rounded-lg"
+                  className="w-full accent-blue-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] text-zinc-400 font-medium">Text Color</label>
+                <label className="text-[11px] text-slate-700 font-medium">Text Color</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -333,7 +333,7 @@ export const CertificateDesigner: React.FC = () => {
                     onChange={(e) =>
                       updateCertElement(selectedElement.id, { color: e.target.value })
                     }
-                    className="h-8 w-10 cursor-pointer rounded border border-white/[0.08] bg-transparent p-0.5"
+                    className="h-8 w-10 cursor-pointer rounded border border-slate-200 bg-white p-0.5"
                   />
                   <input
                     type="text"
@@ -341,33 +341,33 @@ export const CertificateDesigner: React.FC = () => {
                     onChange={(e) =>
                       updateCertElement(selectedElement.id, { color: e.target.value })
                     }
-                    className="w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-1.5 font-mono text-xs text-white focus:outline-none"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 font-mono text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
               </div>
             </div>
 
             {/* LinkedIn 1-Click Integration Card */}
-            <div className="rounded-xl border border-white/[0.08] bg-[#08080a] p-4 space-y-2 mt-4">
+            <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4 space-y-2 mt-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white flex items-center gap-1.5">
-                  <Share2 className="h-3.5 w-3.5 text-devfolio-blue" />
+                <span className="font-fortnite text-sm text-blue-950 uppercase tracking-wide flex items-center gap-1.5">
+                  <Share2 className="h-3.5 w-3.5 text-blue-600" />
                   <span>LinkedIn 1-Click Verification</span>
                 </span>
-                <span className="rounded bg-devfolio-blue/10 px-2 py-0.5 text-[9px] font-bold text-devfolio-blue uppercase">
+                <span className="rounded bg-blue-600 text-white px-2 py-0.5 text-[9px] font-bold uppercase">
                   Ready
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
                 Students can add this certificate straight to their LinkedIn Licenses & Certifications with the official Festra cryptographic verification token.
               </p>
               <a
                 href={linkedInUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 block w-full rounded-xl border border-devfolio-blue/40 bg-devfolio-blue/10 py-2 text-center text-xs font-bold text-devfolio-blue hover:bg-devfolio-blue/20 transition min-h-[34px]"
+                className="mt-2 block w-full rounded-xl bg-blue-600 py-2.5 text-center font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition min-h-[34px] shadow-sm"
               >
-                Test "Add to LinkedIn" Flow
+                TEST "ADD TO LINKEDIN" FLOW
               </a>
             </div>
           </div>

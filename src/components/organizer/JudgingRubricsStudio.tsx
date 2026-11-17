@@ -103,40 +103,40 @@ export const JudgingRubricsStudio: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-blue-100 pb-4">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <Sliders className="h-4 w-4 text-devfolio-blue" />
+          <h2 className="font-fortnite text-2xl tracking-wide text-blue-950 uppercase flex items-center gap-2">
+            <Sliders className="h-5 w-5 text-blue-600" />
             Rubrics & Live Judging Studio
           </h2>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-500 mt-0.5">
             Define criteria weightages and score competing teams for {currentEvent?.title}.
           </p>
         </div>
 
         <button
           onClick={() => setActiveSection("leaderboard")}
-          className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-[#111114] px-3.5 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:border-white/[0.2] transition self-start sm:self-auto"
+          className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-white px-3.5 py-2 font-fortnite text-sm tracking-wide text-blue-900 hover:bg-blue-50 transition shadow-sm self-start sm:self-auto"
         >
-          <Trophy className="h-3.5 w-3.5 text-kahoot-yellow" />
-          <span>Live Leaderboard</span>
+          <Trophy className="h-4 w-4 text-amber-500" />
+          <span>LIVE LEADERBOARD</span>
         </button>
       </div>
 
       {/* Mobile Tab Switcher */}
-      <div className="flex lg:hidden rounded-xl border border-white/[0.08] bg-[#111114] p-1 text-xs">
+      <div className="flex lg:hidden rounded-xl border border-slate-200 bg-slate-100 p-1 text-xs">
         <button
           onClick={() => setMobileTab("scoring")}
-          className={`flex-1 py-2 font-semibold rounded-lg transition ${
-            mobileTab === "scoring" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400"
+          className={`flex-1 py-2 font-fortnite tracking-wide uppercase rounded-lg transition ${
+            mobileTab === "scoring" ? "bg-white text-blue-950 shadow-sm" : "text-slate-600"
           }`}
         >
           Live Scoring Pad
         </button>
         <button
           onClick={() => setMobileTab("rubrics")}
-          className={`flex-1 py-2 font-semibold rounded-lg transition ${
-            mobileTab === "rubrics" ? "bg-white text-zinc-950 shadow-sm" : "text-zinc-400"
+          className={`flex-1 py-2 font-fortnite tracking-wide uppercase rounded-lg transition ${
+            mobileTab === "rubrics" ? "bg-white text-blue-950 shadow-sm" : "text-slate-600"
           }`}
         >
           Rubric Config ({totalWeight}%)
@@ -150,43 +150,43 @@ export const JudgingRubricsStudio: React.FC = () => {
             mobileTab === "scoring" ? "hidden lg:block" : "block"
           }`}
         >
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111114] p-5 space-y-4 shadow-luma-card">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+          <div className="rounded-2xl border border-blue-100 bg-white p-5 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-white">Configured Dimensions</h3>
-                <p className="text-[11px] text-zinc-400">Total weight must equal 100%</p>
+                <h3 className="font-fortnite text-lg tracking-wide text-blue-950 uppercase">Configured Dimensions</h3>
+                <p className="text-[11px] text-slate-500">Total weight must equal 100%</p>
               </div>
 
               <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-mono font-bold ${
+                className={`rounded-full px-2.5 py-0.5 text-xs font-fortnite tracking-wide ${
                   totalWeight === 100
-                    ? "bg-kahoot-green/10 text-kahoot-green border border-kahoot-green/20"
-                    : "bg-kahoot-yellow/10 text-kahoot-yellow border border-kahoot-yellow/20"
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-amber-50 text-amber-700 border border-amber-200"
                 }`}
               >
-                {totalWeight}%
+                {totalWeight}% TOTAL
               </span>
             </div>
 
             {/* Rubrics List */}
             <div className="space-y-3">
               {eventRubrics.map((r) => (
-                <div key={r.id} className="rounded-xl border border-white/[0.06] bg-[#08080a] p-3.5 space-y-2">
+                <div key={r.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white text-xs">{r.name}</span>
+                    <span className="font-fortnite text-base text-blue-950 uppercase tracking-wide">{r.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-devfolio-blue font-bold">{r.weightPercentage}%</span>
+                      <span className="font-fortnite text-base text-blue-600">{r.weightPercentage}%</span>
                       {eventRubrics.length > 1 && (
                         <button
                           onClick={() => deleteRubric(r.id)}
-                          className="text-zinc-500 hover:text-rose-400 transition p-1"
+                          className="text-slate-400 hover:text-rose-500 transition p-1"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       )}
                     </div>
                   </div>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">{r.description}</p>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">{r.description}</p>
                   <div>
                     <input
                       type="range"
@@ -195,7 +195,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                       step={5}
                       value={r.weightPercentage}
                       onChange={(e) => updateRubric(r.id, { weightPercentage: Number(e.target.value) })}
-                      className="w-full accent-devfolio-blue cursor-pointer"
+                      className="w-full accent-blue-600 cursor-pointer h-2"
                     />
                   </div>
                 </div>
@@ -203,8 +203,8 @@ export const JudgingRubricsStudio: React.FC = () => {
             </div>
 
             {/* Add New Criterion Form */}
-            <form onSubmit={handleAddRubric} className="pt-3 border-t border-white/[0.06] space-y-3 text-xs">
-              <h4 className="font-bold text-zinc-200">Add Evaluation Dimension</h4>
+            <form onSubmit={handleAddRubric} className="pt-3 border-t border-slate-100 space-y-3 text-xs">
+              <h4 className="font-fortnite text-sm text-blue-950 uppercase tracking-wide">Add Evaluation Dimension</h4>
               <div>
                 <input
                   type="text"
@@ -212,7 +212,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                   placeholder="e.g. System Security, Feasibility, Novelty"
                   value={newRubricName}
                   onChange={(e) => setNewRubricName(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-2 text-white placeholder-zinc-500 focus:border-devfolio-blue focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none"
                 />
               </div>
               <div className="flex gap-2">
@@ -221,7 +221,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                   placeholder="Short descriptor for jury"
                   value={newRubricDesc}
                   onChange={(e) => setNewRubricDesc(e.target.value)}
-                  className="flex-1 rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-2 text-white placeholder-zinc-500 focus:border-devfolio-blue focus:outline-none"
+                  className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none"
                 />
                 <div className="flex items-center gap-1">
                   <input
@@ -230,17 +230,17 @@ export const JudgingRubricsStudio: React.FC = () => {
                     max={50}
                     value={newRubricWeight}
                     onChange={(e) => setNewRubricWeight(Number(e.target.value))}
-                    className="w-14 rounded-xl border border-white/[0.08] bg-[#08080a] px-2 py-2 text-white font-mono text-center focus:outline-none"
+                    className="w-14 rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-slate-900 font-fortnite text-base text-center focus:outline-none"
                   />
-                  <span className="text-zinc-400 font-bold">%</span>
+                  <span className="text-slate-500 font-bold">%</span>
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.04] py-2 font-semibold text-white hover:bg-white/[0.08] transition min-h-[38px]"
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 py-2.5 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition shadow-sm min-h-[38px]"
               >
                 <Plus className="h-4 w-4" />
-                <span>Add Dimension</span>
+                <span>ADD DIMENSION</span>
               </button>
             </form>
           </div>
@@ -252,27 +252,27 @@ export const JudgingRubricsStudio: React.FC = () => {
             mobileTab === "rubrics" ? "hidden lg:block" : "block"
           }`}
         >
-          <div className="rounded-2xl border border-white/[0.08] bg-[#111114] p-5 space-y-5 shadow-luma-card">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+          <div className="rounded-2xl border border-blue-100 bg-white p-5 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <FileCheck2 className="h-4 w-4 text-kahoot-green" />
+                <h3 className="font-fortnite text-lg tracking-wide text-blue-950 uppercase flex items-center gap-2">
+                  <FileCheck2 className="h-4 w-4 text-blue-600" />
                   Live Scoring Pad
                 </h3>
-                <p className="text-xs text-zinc-400">Select squad and slide criteria scores</p>
+                <p className="text-xs text-slate-500">Select squad and slide criteria scores</p>
               </div>
 
               <div className="text-right">
-                <div className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Calculated Score</div>
-                <div className="font-mono text-2xl sm:text-3xl font-black text-kahoot-green">
-                  {computedTotal.toFixed(1)} <span className="text-xs text-zinc-500">/ 100</span>
+                <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Calculated Score</div>
+                <div className="font-fortnite text-3xl sm:text-4xl text-blue-600 leading-none mt-1">
+                  {computedTotal.toFixed(1)} <span className="text-xs font-sans text-slate-400">/ 100</span>
                 </div>
               </div>
             </div>
 
             {isScoreSaved && (
-              <div className="rounded-xl border border-kahoot-green/30 bg-kahoot-green/10 p-3 text-xs text-kahoot-green flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
                 <span>Scorecard recorded! Live leaderboard and standings updated.</span>
               </div>
             )}
@@ -280,11 +280,11 @@ export const JudgingRubricsStudio: React.FC = () => {
             <form onSubmit={handleSaveEvaluation} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-zinc-400 font-medium">Select Squad</label>
+                  <label className="text-slate-700 font-medium">Select Squad</label>
                   <select
                     value={selectedTeamId}
                     onChange={(e) => setSelectedTeamId(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-2 text-white focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   >
                     {eventTeams.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -295,33 +295,33 @@ export const JudgingRubricsStudio: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-zinc-400 font-medium">Judge Name</label>
+                  <label className="text-slate-700 font-medium">Judge Name</label>
                   <input
                     type="text"
                     required
                     value={judgeName}
                     onChange={(e) => setJudgeName(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-2 text-white focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               {/* Selected Squad Project Context */}
               {selectedTeam && (
-                <div className="rounded-xl border border-white/[0.06] bg-[#08080a] p-3.5 space-y-1.5">
+                <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white">{selectedTeam.teamName}</span>
-                    <span className="text-zinc-400 text-[11px]">{selectedTeam.collegeName}</span>
+                    <span className="font-fortnite text-base text-blue-950 uppercase tracking-wide">{selectedTeam.teamName}</span>
+                    <span className="text-slate-500 text-[11px]">{selectedTeam.collegeName}</span>
                   </div>
                   {teamSubmission ? (
-                    <div className="text-zinc-400 text-[11px] space-y-1">
-                      <div>Problem: <span className="text-zinc-200">{teamSubmission.problemStatement}</span></div>
+                    <div className="text-slate-600 text-[11px] space-y-1">
+                      <div>Problem: <span className="text-slate-900 font-medium">{teamSubmission.problemStatement}</span></div>
                       <div className="flex flex-wrap items-center gap-3 pt-1">
                         <a
                           href={teamSubmission.githubRepoUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-devfolio-blue hover:underline flex items-center gap-1 font-medium"
+                          className="text-blue-600 hover:underline flex items-center gap-1 font-medium"
                         >
                           <Github className="h-3.5 w-3.5" />
                           <span>Code Repository</span>
@@ -331,7 +331,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                             href={teamSubmission.liveDemoUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-kahoot-green hover:underline flex items-center gap-1 font-medium"
+                            className="text-emerald-600 hover:underline flex items-center gap-1 font-medium"
                           >
                             <Globe className="h-3.5 w-3.5" />
                             <span>Live Deployed URL</span>
@@ -340,7 +340,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-zinc-500 text-[11px]">No formal project submission linked yet.</div>
+                    <div className="text-slate-400 text-[11px]">No formal project submission linked yet.</div>
                   )}
                 </div>
               )}
@@ -350,14 +350,14 @@ export const JudgingRubricsStudio: React.FC = () => {
                 {eventRubrics.map((r) => {
                   const currentVal = scores[r.id] ?? 8;
                   return (
-                    <div key={r.id} className="rounded-xl border border-white/[0.06] bg-[#08080a] p-3.5 space-y-2">
+                    <div key={r.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="font-semibold text-white">{r.name}</span>
-                          <span className="ml-2 text-zinc-400 text-[10px]">({r.weightPercentage}%)</span>
+                          <span className="font-fortnite text-base text-blue-950 uppercase tracking-wide">{r.name}</span>
+                          <span className="ml-2 text-slate-500 text-[11px]">({r.weightPercentage}%)</span>
                         </div>
-                        <span className="font-mono font-bold text-white text-sm">
-                          {currentVal} <span className="text-xs text-zinc-500">/ 10</span>
+                        <span className="font-fortnite text-xl text-blue-600">
+                          {currentVal} <span className="text-xs font-sans text-slate-400">/ 10</span>
                         </span>
                       </div>
 
@@ -368,7 +368,7 @@ export const JudgingRubricsStudio: React.FC = () => {
                         step={0.5}
                         value={currentVal}
                         onChange={(e) => handleScoreChange(r.id, Number(e.target.value))}
-                        className="w-full accent-kahoot-green cursor-pointer h-2"
+                        className="w-full accent-blue-600 cursor-pointer h-2"
                       />
                     </div>
                   );
@@ -376,21 +376,21 @@ export const JudgingRubricsStudio: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-zinc-400 font-medium">Jury Evaluation Notes</label>
+                <label className="text-slate-700 font-medium">Jury Evaluation Notes</label>
                 <textarea
                   rows={2}
                   placeholder="e.g. Robust architecture, crisp technical defense on concurrency."
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-white/[0.08] bg-[#08080a] px-3 py-2 text-white placeholder-zinc-600 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-kahoot-green py-3 font-bold text-white hover:opacity-95 transition shadow-kahoot-green min-h-[44px]"
+                className="w-full rounded-xl bg-blue-600 py-3.5 font-fortnite text-base tracking-wide text-white hover:bg-blue-700 transition shadow-sm min-h-[44px]"
               >
-                Submit Scorecard & Update Leaderboard
+                SUBMIT SCORECARD & UPDATE LEADERBOARD
               </button>
             </form>
           </div>

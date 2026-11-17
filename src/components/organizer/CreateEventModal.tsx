@@ -68,43 +68,43 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-blue-100 bg-white p-6 sm:p-8 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600/20 text-blue-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white font-fortnite text-lg">
               <Sparkles className="h-4 w-4" />
             </div>
-            <h2 className="text-base font-bold text-white">Create New Event Track</h2>
+            <h2 className="font-fortnite text-2xl text-blue-950 uppercase tracking-wide">Create New Event Track</h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-900 hover:text-white"
+            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-xs">
           <div>
-            <label className="font-medium text-zinc-300">Event Title</label>
+            <label className="font-medium text-slate-700">Event Title</label>
             <input
               type="text"
               required
               placeholder="e.g. CodeSprint 2026, RoboCombat, Paper Presentation"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-medium text-zinc-300">Category</label>
+              <label className="font-medium text-slate-700">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as EventCategory)}
-                className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none"
               >
                 <option value="hackathon">Hackathon</option>
                 <option value="paper_presentation">Paper Presentation</option>
@@ -116,117 +116,117 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onCl
             </div>
 
             <div>
-              <label className="font-medium text-zinc-300">Venue / Lab Room</label>
+              <label className="font-medium text-slate-700">Venue / Lab Room</label>
               <input
                 type="text"
                 value={venue}
                 onChange={(e) => setVenue(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-medium text-zinc-300">One-line Tagline</label>
+            <label className="font-medium text-slate-700">One-line Tagline</label>
             <input
               type="text"
               placeholder="e.g. 24 hours of autonomous agent design and systems hacking"
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="font-medium text-zinc-300">Max Teams Capacity</label>
+              <label className="font-medium text-slate-700">Max Teams Capacity</label>
               <input
                 type="number"
                 min={5}
                 max={200}
                 value={maxTeams}
                 onChange={(e) => setMaxTeams(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none"
               />
             </div>
             <div>
-              <label className="font-medium text-zinc-300">Min Squad Size</label>
+              <label className="font-medium text-slate-700">Min Squad Size</label>
               <input
                 type="number"
                 min={1}
                 max={5}
                 value={teamSizeMin}
                 onChange={(e) => setTeamSizeMin(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none"
               />
             </div>
             <div>
-              <label className="font-medium text-zinc-300">Max Squad Size</label>
+              <label className="font-medium text-slate-700">Max Squad Size</label>
               <input
                 type="number"
                 min={1}
                 max={8}
                 value={teamSizeMax}
                 onChange={(e) => setTeamSizeMax(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-white focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-blue-600 focus:bg-white focus:outline-none"
               />
             </div>
           </div>
 
           {/* Registration Fee & UPI Settings */}
-          <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 p-3 space-y-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-semibold text-white">Delegate Fee & Payment</div>
-                <div className="text-[11px] text-zinc-400">Collect delegate fee via direct UPI Intent</div>
+                <div className="font-fortnite text-base text-blue-950 uppercase tracking-wide">Delegate Fee & Payment</div>
+                <div className="text-[11px] text-slate-500">Collect delegate fee via direct UPI Intent</div>
               </div>
               <input
                 type="checkbox"
                 checked={isPaid}
                 onChange={(e) => setIsPaid(e.target.checked)}
-                className="h-4 w-4 rounded accent-blue-600"
+                className="h-4 w-4 rounded accent-blue-600 cursor-pointer"
               />
             </div>
 
             {isPaid && (
-              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-800/60">
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200">
                 <div>
-                  <label className="font-medium text-zinc-300">Fee per Team (₹)</label>
+                  <label className="font-medium text-slate-700">Fee per Team (₹)</label>
                   <input
                     type="number"
                     min={10}
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(Number(e.target.value))}
-                    className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-white focus:outline-none"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600"
                   />
                 </div>
                 <div>
-                  <label className="font-medium text-zinc-300">Organizer UPI ID</label>
+                  <label className="font-medium text-slate-700">Organizer UPI ID</label>
                   <input
                     type="text"
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
                     placeholder="e.g. acm@sbi"
-                    className="mt-1 w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-white focus:outline-none font-mono"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 font-mono"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800/80">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-zinc-800 px-4 py-2 font-medium text-zinc-400 hover:text-white"
+              className="rounded-xl border border-slate-200 px-4 py-2 font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-white px-4 py-2 font-semibold text-zinc-950 hover:bg-zinc-200 transition"
+              className="rounded-xl bg-blue-600 px-5 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition shadow-sm"
             >
-              Create Track
+              CREATE TRACK
             </button>
           </div>
         </form>

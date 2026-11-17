@@ -12,7 +12,6 @@ import {
   Plus,
   RefreshCw,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -41,28 +40,31 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#08080a]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 w-full border-b border-blue-100 bg-white/95 backdrop-blur-md shadow-sm">
       {/* Top Application Bar */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2.5 sm:px-6">
         {/* Left: Brand & Event Context */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-devfolio-blue text-white font-black text-sm shadow-luma-glow">
+          <div
+            onClick={() => setViewMode("landing")}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white font-fortnite text-xl shadow-sm shadow-blue-500/25">
               F
             </div>
-            <span className="font-extrabold tracking-tight text-white text-base">
-              FESTRA<span className="text-kahoot-red">.</span>
+            <span className="font-fortnite text-2xl tracking-wide text-blue-950 uppercase">
+              FESTRA<span className="text-blue-600">.</span>
             </span>
           </div>
 
-          <div className="hidden sm:block h-4 w-px bg-white/[0.12]" />
+          <div className="hidden sm:block h-4 w-px bg-slate-200" />
 
           {/* Event Dropdown Picker */}
           <div className="relative flex items-center gap-1.5">
             <select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
-              className="appearance-none rounded-lg border border-white/[0.08] bg-[#111114] px-2.5 py-1.5 pr-7 text-xs font-medium text-zinc-200 hover:border-white/[0.2] focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
+              className="appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 pr-7 text-xs font-semibold text-slate-800 hover:border-blue-400 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[220px] truncate"
             >
               {events.map((ev) => (
                 <option key={ev.id} value={ev.id}>
@@ -70,46 +72,46 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
                 </option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-2 h-3 w-3 text-zinc-400" />
+            <ChevronDown className="pointer-events-none absolute right-2 h-3.5 w-3.5 text-slate-500" />
 
             <button
               onClick={onOpenCreateEvent}
               title="Create New Event Track"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.08] bg-[#111114] text-zinc-300 hover:text-white hover:bg-white/[0.06] transition"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:text-blue-600 hover:border-blue-300 transition"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Center: Mode Switcher (Landing vs Organizer vs Student View) */}
-        <div className="flex items-center rounded-lg border border-white/[0.08] bg-[#111114] p-0.5 text-xs">
+        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100 p-0.5 text-xs">
           <button
             onClick={() => setViewMode("landing")}
-            className={`rounded-md px-2.5 sm:px-3 py-1 font-medium transition ${
+            className={`rounded-lg px-2.5 sm:px-3 py-1 font-semibold transition ${
               viewMode === "landing"
                 ? "bg-blue-600 text-white font-bold shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Landing
           </button>
           <button
             onClick={() => setViewMode("dashboard")}
-            className={`rounded-md px-2.5 sm:px-3 py-1 font-medium transition ${
+            className={`rounded-lg px-2.5 sm:px-3 py-1 font-semibold transition ${
               viewMode === "dashboard"
-                ? "bg-white text-zinc-950 font-semibold shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-blue-600 text-white font-bold shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Organizer
           </button>
           <button
             onClick={() => setViewMode("portal")}
-            className={`rounded-md px-2.5 sm:px-3 py-1 font-medium transition ${
+            className={`rounded-lg px-2.5 sm:px-3 py-1 font-semibold transition ${
               viewMode === "portal"
-                ? "bg-white text-zinc-950 font-semibold shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-blue-600 text-white font-bold shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             Student View
@@ -125,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
               }
             }}
             title="Reset to clean defaults"
-            className="flex items-center gap-1 rounded-lg border border-white/[0.08] bg-[#111114] px-2 py-1 text-[11px] font-medium text-zinc-400 hover:text-zinc-200 hover:border-white/[0.15] transition"
+            className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
           >
             <RefreshCw className="h-3 w-3" />
             <span className="hidden md:inline">Reset</span>
@@ -135,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
 
       {/* Subnav (for Organizer Studio) with clean horizontal touch scroll */}
       {viewMode === "dashboard" && (
-        <div className="border-t border-white/[0.06] bg-[#08080a] px-3 sm:px-6">
+        <div className="border-t border-blue-100 bg-white px-3 sm:px-6">
           <nav className="mx-auto flex max-w-7xl gap-1.5 overflow-x-auto py-2 no-scrollbar">
             {sections.map((sec) => {
               const Icon = sec.icon;
@@ -144,10 +146,10 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
                 <button
                   key={sec.id}
                   onClick={() => setActiveSection(sec.id)}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition min-h-[36px] ${
+                  className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition min-h-[34px] ${
                     isActive
-                      ? "bg-devfolio-blue text-white font-semibold shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
+                      : "text-slate-600 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
