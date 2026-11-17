@@ -86,14 +86,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
         <div className="flex items-center rounded-lg border border-white/[0.08] bg-[#111114] p-0.5 text-xs">
           <button
             onClick={() => setViewMode("landing")}
-            className={`rounded-md px-2 sm:px-2.5 py-1 font-medium transition flex items-center gap-1 ${
+            className={`rounded-md px-2.5 sm:px-3 py-1 font-medium transition ${
               viewMode === "landing"
-                ? "bg-amber-400 text-zinc-950 font-bold shadow-sm"
+                ? "bg-blue-600 text-white font-bold shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
-            <span>⚡</span>
-            <span className="hidden sm:inline">Lobby /</span> Landing
+            Landing
           </button>
           <button
             onClick={() => setViewMode("dashboard")}

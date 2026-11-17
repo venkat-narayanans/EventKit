@@ -11,18 +11,14 @@ import { LeaderboardManager } from "@/components/organizer/LeaderboardManager";
 import { CertificateDesigner } from "@/components/organizer/CertificateDesigner";
 import { ComplianceDossier } from "@/components/organizer/ComplianceDossier";
 import { StudentPortal } from "@/components/portal/StudentPortal";
-import { FortniteLandingPage } from "@/components/landing/FortniteLandingPage";
+import { LandingPage } from "@/components/landing/LandingPage";
 
 export default function HomePage() {
   const { viewMode, activeSection } = useStore();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   if (viewMode === "landing") {
-    return (
-      <div className="min-h-screen bg-fortnite-grid text-white flex flex-col font-sans">
-        <FortniteLandingPage />
-      </div>
-    );
+    return <LandingPage />;
   }
 
   return (
