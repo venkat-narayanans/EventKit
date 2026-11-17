@@ -206,8 +206,8 @@ const DEFAULT_CANVAS_ELEMENTS: CanvasElement[] = [
 
 interface FestraStore {
   // Navigation & Workspace State
-  viewMode: "dashboard" | "portal"; // dashboard = organizer tool; portal = student participant view
-  setViewMode: (mode: "dashboard" | "portal") => void;
+  viewMode: "landing" | "dashboard" | "portal"; // landing = fortnite theme landing page; dashboard = organizer tool; portal = student participant view
+  setViewMode: (mode: "landing" | "dashboard" | "portal") => void;
 
   activeSection: "events" | "submissions" | "judging" | "leaderboard" | "certificates" | "compliance";
   setActiveSection: (section: FestraStore["activeSection"]) => void;
@@ -253,7 +253,7 @@ interface FestraStore {
 export const useStore = create<FestraStore>()(
   persist(
     (set, get) => ({
-      viewMode: "dashboard",
+      viewMode: "landing",
       setViewMode: (mode) => set({ viewMode: mode }),
 
       activeSection: "events",
