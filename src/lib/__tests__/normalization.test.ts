@@ -10,27 +10,27 @@ describe("Scoring & Z-Score Normalization Engine", () => {
   const rubrics: RubricDimension[] = [
     {
       id: "tech_complexity",
+      eventId: "hack-ai-2026",
       name: "Technical Complexity",
       description: "Architecture and code quality",
       weightPercentage: 40,
       maxPoints: 10,
-      descriptors: { low: "Poor", mid: "OK", high: "Great" },
     },
     {
       id: "innovation",
+      eventId: "hack-ai-2026",
       name: "Innovation & Novelty",
       description: "Originality of concept",
       weightPercentage: 30,
       maxPoints: 10,
-      descriptors: { low: "Clone", mid: "Standard", high: "Novel" },
     },
     {
       id: "ui_ux",
+      eventId: "hack-ai-2026",
       name: "UI & UX",
       description: "Usability and polish",
       weightPercentage: 30,
       maxPoints: 10,
-      descriptors: { low: "Broken", mid: "Good", high: "Flawless" },
     },
   ];
 

@@ -10,36 +10,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          dark: "#09090b",
-          card: "#121215",
-          border: "#27272a",
-          coral: "#ff4757",
-          cyan: "#00d2d3",
-          lime: "#a8ff3e",
-          amber: "#ffa502",
-          violet: "#6c5ce7",
-          pink: "#ff6b81",
+        canvas: "#08080a", // Luma deep black canvas
+        card: "#111114",   // Luma elevated card
+        border: "rgba(255, 255, 255, 0.08)",
+        devfolio: {
+          blue: "#3770ff", // Devfolio signature blue
+          dark: "#0f172a",
+        },
+        kahoot: {
+          red: "#e21b3c",    // Kahoot Red (Hackathons, urgent countdowns)
+          blue: "#1368ce",   // Kahoot Blue (Systems, Research papers)
+          yellow: "#ffa602", // Kahoot Yellow (Trophies, #1 Gold, Prizes)
+          green: "#2ecc71",  // Kahoot Green (Robotics, Verified, Check-in)
+          purple: "#46178f", // Kahoot Purple (Leaderboard, Celebration)
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "Inter", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "JetBrains Mono", "monospace"],
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        mono: ["JetBrains Mono", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 30px -5px rgba(108, 92, 231, 0.3)",
-        "glow-cyan": "0 0 30px -5px rgba(0, 210, 211, 0.3)",
-        "glow-lime": "0 0 30px -5px rgba(168, 255, 62, 0.3)",
-      },
-      animation: {
-        "pulse-subtle": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "badge-shimmer": "shimmer 2.5s infinite linear",
-      },
-      keyframes: {
-        shimmer: {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(100%)" },
-        },
+        "luma-card": "0 8px 30px -8px rgba(0, 0, 0, 0.7)",
+        "luma-glow": "0 0 25px -5px rgba(55, 112, 255, 0.2)",
+        "kahoot-red": "0 3px 0 #b3132c",
+        "kahoot-blue": "0 3px 0 #0d4fa0",
+        "kahoot-green": "0 3px 0 #219653",
+        "kahoot-yellow": "0 3px 0 #c78200",
       },
     },
   },
