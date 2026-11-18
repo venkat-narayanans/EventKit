@@ -32,3 +32,9 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local Agent Skills & Raw Archives
+.agents/
+skills-lock.json
+Fortnite.zip
+public/fonts/fortnite/
