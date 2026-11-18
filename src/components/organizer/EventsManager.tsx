@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
-import { RegisteredTeam, TeamMember } from "@/types";
+import { Event, RegisteredTeam, TeamMember } from "@/types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Mail,
   MapPin,
+  Pencil,
   Plus,
   Search,
   Ticket,
@@ -27,9 +28,13 @@ import {
 
 interface EventsManagerProps {
   onOpenCreate: () => void;
+  onEditEvent: (event: Event) => void;
 }
 
-export const EventsManager: React.FC<EventsManagerProps> = ({ onOpenCreate }) => {
+export const EventsManager: React.FC<EventsManagerProps> = ({
+  onOpenCreate,
+  onEditEvent,
+}) => {
   const {
     events,
     setSelectedEventId,
@@ -190,26 +195,40 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ onOpenCreate }) =>
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                   <span className="inline-flex items-center gap-1 font-fortnite text-sm uppercase tracking-wide text-blue-600 group-hover:translate-x-0.5 transition">
                     <span>VIEW ANALYTICS & TEAMS</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
 
-                  {events.length > 1 && (
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (confirm(`Delete "${ev.title}"?`)) {
-                          deleteEvent(ev.id);
-                        }
+                        onEditEvent(ev);
                       }}
-                      title="Delete event"
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                      title="Edit event track"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-blue-200 bg-blue-50/70 text-[11px] font-bold text-blue-700 hover:bg-blue-100 transition"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Pencil className="h-3 w-3" />
+                      <span>Edit</span>
                     </button>
-                  )}
+
+                    {events.length > 1 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete "${ev.title}"?`)) {
+                            deleteEvent(ev.id);
+                          }
+                        }}
+                        title="Delete event"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -283,13 +302,23 @@ export const EventsManager: React.FC<EventsManagerProps> = ({ onOpenCreate }) =>
           </p>
         </div>
 
-        <button
-          onClick={() => setViewMode("portal")}
-          className="self-start sm:self-auto flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:border-blue-300 transition min-h-[38px]"
-        >
-          <span>Open Student Registration</span>
-          <ExternalLink className="h-3 w-3" />
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => onEditEvent(openedEvent)}
+            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition min-h-[38px] shadow-sm shadow-blue-500/20"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            <span>EDIT EVENT</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode("portal")}
+            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:border-blue-300 transition min-h-[38px]"
+          >
+            <span>Open Student Registration</span>
+            <ExternalLink className="h-3 w-3" />
+          </button>
+        </div>
       </div>
 
       {/* EVENT-SPECIFIC ANALYTICS CARDS */}

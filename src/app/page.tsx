@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useStore } from "@/lib/store";
+import { Event } from "@/types";
 import { Header } from "@/components/Header";
 import { CreateEventModal } from "@/components/organizer/CreateEventModal";
 import { EventsManager } from "@/components/organizer/EventsManager";
@@ -15,7 +16,23 @@ import { LandingPage } from "@/components/landing/LandingPage";
 
 export default function HomePage() {
   const { viewMode, activeSection } = useStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
+  const openCreateEvent = () => {
+    setEditingEvent(null);
+    setIsEventModalOpen(true);
+  };
+
+  const openEditEvent = (ev: Event) => {
+    setEditingEvent(ev);
+    setIsEventModalOpen(true);
+  };
+
+  const closeEventModal = () => {
+    setIsEventModalOpen(false);
+    setEditingEvent(null);
+  };
 
   if (viewMode === "landing") {
     return <LandingPage />;
@@ -23,7 +40,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
-      <Header onOpenCreateEvent={() => setIsCreateModalOpen(true)} />
+      <Header onOpenCreateEvent={openCreateEvent} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4">
         {viewMode === "portal" ? (
@@ -31,7 +48,10 @@ export default function HomePage() {
         ) : (
           <>
             {activeSection === "events" && (
-              <EventsManager onOpenCreate={() => setIsCreateModalOpen(true)} />
+              <EventsManager
+                onOpenCreate={openCreateEvent}
+                onEditEvent={openEditEvent}
+              />
             )}
             {activeSection === "submissions" && <SubmissionsManager />}
             {activeSection === "judging" && <JudgingRubricsStudio />}
@@ -43,8 +63,9 @@ export default function HomePage() {
       </main>
 
       <CreateEventModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isEventModalOpen}
+        onClose={closeEventModal}
+        editingEvent={editingEvent}
       />
     </div>
   );
