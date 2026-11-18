@@ -113,24 +113,97 @@ export interface JudgeEvaluation {
   evaluatedAt: string;
 }
 
+export type CanvasElementType =
+  | "name"
+  | "event"
+  | "institution"
+  | "role"
+  | "date"
+  | "qr"
+  | "signatures"
+  | "custom_text"
+  | "logo"
+  | "signature_img"
+  | "seal"
+  | "divider"
+  | "box";
+
+export type CanvasElementKind = "text" | "image" | "shape" | "badge" | "qr";
+
+export type CertificateBorderStyle =
+  | "none"
+  | "classic_double"
+  | "modern_accent"
+  | "ornate_corners"
+  | "minimal_line";
+
+export type CertificateBadgeStyle =
+  | "gold_seal"
+  | "blue_crest"
+  | "star_ribbon"
+  | "verified_stamp";
+
 export interface CanvasElement {
   id: string;
-  type: "name" | "event" | "institution" | "role" | "date" | "qr" | "signatures";
+  kind?: CanvasElementKind; // defaults to "text" (or inferred from type)
+  type: CanvasElementType;
   label: string;
   text: string;
   xPercent: number; // 0 to 100 on canvas
   yPercent: number; // 0 to 100 on canvas
-  fontSize: number; // px
+  fontSize: number; // px in virtual 1200x850 canvas coordinate space
   fontFamily: string;
   color: string;
   fontWeight: string;
+  fontStyle?: "normal" | "italic";
+  textTransform?: "none" | "uppercase" | "capitalize";
+  letterSpacing?: number; // px
+  textAlign?: "left" | "center" | "right";
+  opacity?: number; // 0 to 1
+  rotation?: number; // degrees
   enabled: boolean;
+  locked?: boolean;
+  // Image / Logo / Signature / Shape / Badge properties
+  imageDataUrl?: string;
+  widthPercent?: number; // % of canvas width (1..100)
+  heightPercent?: number; // % of canvas height (0.2..100)
+  borderRadius?: number; // px (999 for circular)
+  badgeStyle?: CertificateBadgeStyle;
+  shapeType?: "line" | "rectangle" | "pill";
 }
 
 export interface CertificateConfig {
   eventId: string;
+  templateId?: string;
   backgroundDataUrl: string; // Base64 or URL
+  backgroundColor?: string;
+  backgroundGradient?: string;
+  borderStyle?: CertificateBorderStyle;
+  borderColor?: string;
+  accentColor?: string;
   elements: CanvasElement[];
   width: number;
   height: number;
+}
+
+export interface CertificateRecipient {
+  id: string;
+  name: string;
+  email: string;
+  teamName: string;
+  collegeName: string;
+  awardRole: string;
+  certificateCode: string;
+  verificationHash: string;
+  issueDate: string;
+  source: "registration" | "imported";
+}
+
+export interface GeneratedCertificate {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  recipient: CertificateRecipient;
+  generatedAt: string;
+  templateSnapshot: CertificateConfig;
 }

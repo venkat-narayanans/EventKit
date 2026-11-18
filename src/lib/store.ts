@@ -8,8 +8,15 @@ import {
   JudgeScore,
   CertificateConfig,
   CanvasElement,
+  CertificateRecipient,
+  GeneratedCertificate,
 } from "@/types";
-import { calculateWeightedScore, normalizeJudgeScores, aggregateTeamRankings } from "./normalization";
+import {
+  CERTIFICATE_TEMPLATES,
+  CERT_CANVAS_HEIGHT,
+  CERT_CANVAS_WIDTH,
+  generateBulkCertificates,
+} from "./certificate";
 
 const INITIAL_EVENTS: Event[] = [
   {
@@ -110,99 +117,11 @@ const INITIAL_RUBRICS: RubricDimension[] = [
   },
 ];
 
-const DEFAULT_CANVAS_ELEMENTS: CanvasElement[] = [
-  {
-    id: "el-institution",
-    type: "institution",
-    label: "Host College / Institution",
-    text: "DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING",
-    xPercent: 50,
-    yPercent: 18,
-    fontSize: 14,
-    fontFamily: "Inter, sans-serif",
-    color: "#94a3b8",
-    fontWeight: "600",
-    enabled: true,
-  },
-  {
-    id: "el-title",
-    type: "event",
-    label: "Certificate Title",
-    text: "CERTIFICATE OF ACHIEVEMENT",
-    xPercent: 50,
-    yPercent: 26,
-    fontSize: 26,
-    fontFamily: "Georgia, serif",
-    color: "#f8fafc",
-    fontWeight: "700",
-    enabled: true,
-  },
-  {
-    id: "el-name",
-    type: "name",
-    label: "Participant Name",
-    text: "Alex R. Chen",
-    xPercent: 50,
-    yPercent: 48,
-    fontSize: 38,
-    fontFamily: "Georgia, serif",
-    color: "#ffffff",
-    fontWeight: "700",
-    enabled: true,
-  },
-  {
-    id: "el-role",
-    type: "role",
-    label: "Achievement / Award",
-    text: "First Place Winner — HackCampus 2026",
-    xPercent: 50,
-    yPercent: 60,
-    fontSize: 16,
-    fontFamily: "Inter, sans-serif",
-    color: "#38bdf8",
-    fontWeight: "600",
-    enabled: true,
-  },
-  {
-    id: "el-date",
-    type: "date",
-    label: "Event Date",
-    text: "Issued on November 21, 2026",
-    xPercent: 20,
-    yPercent: 84,
-    fontSize: 12,
-    fontFamily: "Inter, sans-serif",
-    color: "#64748b",
-    fontWeight: "500",
-    enabled: true,
-  },
-  {
-    id: "el-signatures",
-    type: "signatures",
-    label: "Faculty Signatures",
-    text: "Dr. K. Ramanathan (HOD)   •   Dr. S. Meenakshi (Convener)",
-    xPercent: 80,
-    yPercent: 84,
-    fontSize: 12,
-    fontFamily: "Inter, sans-serif",
-    color: "#cbd5e1",
-    fontWeight: "500",
-    enabled: true,
-  },
-  {
-    id: "el-qr",
-    type: "qr",
-    label: "Verification QR Code",
-    text: "VERIFY: CF-2026-8921",
-    xPercent: 50,
-    yPercent: 82,
-    fontSize: 10,
-    fontFamily: "monospace",
-    color: "#64748b",
-    fontWeight: "500",
-    enabled: true,
-  },
-];
+const DEFAULT_CERT_CONFIG: CertificateConfig = {
+  eventId: "hack-ai-2026",
+  ...CERTIFICATE_TEMPLATES[0].config,
+  elements: CERTIFICATE_TEMPLATES[0].config.elements.map((e) => ({ ...e })),
+};
 
 interface FestraStore {
   // Navigation & Workspace State
@@ -239,12 +158,29 @@ interface FestraStore {
   judgeScores: JudgeScore[];
   submitScore: (score: Omit<JudgeScore, "id" | "evaluatedAt" | "totalRaw">) => void;
 
-  // Certificate Studio (BYOD)
+  // Certificate Studio (Canva-Grade BYOD + Bulk Generation)
   certConfig: CertificateConfig;
+  updateCertConfig: (updates: Partial<CertificateConfig>) => void;
+  applyCertTemplate: (config: CertificateConfig) => void;
   updateCertElement: (id: string, updates: Partial<CanvasElement>) => void;
   updateCertBackground: (dataUrl: string) => void;
-  addCertElement: (el: Omit<CanvasElement, "id">) => void;
+  addCertElement: (el: Omit<CanvasElement, "id">) => string;
   deleteCertElement: (id: string) => void;
+  duplicateCertElement: (id: string) => string | null;
+  reorderCertElement: (id: string, direction: "up" | "down") => void;
+
+  // Bulk Recipients & Generated Certificates
+  customRecipients: Record<string, CertificateRecipient[]>;
+  addCustomRecipients: (eventId: string, recipients: CertificateRecipient[]) => void;
+  replaceCustomRecipients: (eventId: string, recipients: CertificateRecipient[]) => void;
+  clearCustomRecipients: (eventId: string) => void;
+  generatedCertificates: GeneratedCertificate[];
+  generateAllCertificates: (
+    eventId: string,
+    recipients: CertificateRecipient[],
+    eventTitle: string
+  ) => GeneratedCertificate[];
+  clearGeneratedCertificates: (eventId: string) => void;
 
   // Reset to initial clean state
   resetAll: () => void;
@@ -428,12 +364,24 @@ export const useStore = create<FestraStore>()(
         }));
       },
 
-      certConfig: {
-        eventId: "hack-ai-2026",
-        backgroundDataUrl: "", // Defaults to clean dark geometric canvas
-        elements: DEFAULT_CANVAS_ELEMENTS,
-        width: 1920,
-        height: 1080,
+      certConfig: DEFAULT_CERT_CONFIG,
+      updateCertConfig: (updates) => {
+        set((state) => ({
+          certConfig: {
+            ...state.certConfig,
+            ...updates,
+          },
+        }));
+      },
+      applyCertTemplate: (config) => {
+        set({
+          certConfig: {
+            ...config,
+            width: config.width || CERT_CANVAS_WIDTH,
+            height: config.height || CERT_CANVAS_HEIGHT,
+            elements: config.elements.map((el) => ({ ...el })),
+          },
+        });
       },
       updateCertElement: (id, updates) => {
         set((state) => ({
@@ -454,12 +402,14 @@ export const useStore = create<FestraStore>()(
         }));
       },
       addCertElement: (elData) => {
+        const newId = `el-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         set((state) => ({
           certConfig: {
             ...state.certConfig,
-            elements: [...state.certConfig.elements, { ...elData, id: `el-${Date.now()}` }],
+            elements: [...state.certConfig.elements, { ...elData, id: newId }],
           },
         }));
+        return newId;
       },
       deleteCertElement: (id) => {
         set((state) => ({
@@ -469,23 +419,113 @@ export const useStore = create<FestraStore>()(
           },
         }));
       },
+      duplicateCertElement: (id) => {
+        const existing = get().certConfig.elements.find((e) => e.id === id);
+        if (!existing) return null;
+        const newId = `el-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const copy: CanvasElement = {
+          ...existing,
+          id: newId,
+          label: `${existing.label} (Copy)`,
+          xPercent: Math.min(92, existing.xPercent + 3),
+          yPercent: Math.min(92, existing.yPercent + 3),
+        };
+        set((state) => ({
+          certConfig: {
+            ...state.certConfig,
+            elements: [...state.certConfig.elements, copy],
+          },
+        }));
+        return newId;
+      },
+      reorderCertElement: (id, direction) => {
+        set((state) => {
+          const list = [...state.certConfig.elements];
+          const idx = list.findIndex((e) => e.id === id);
+          if (idx === -1) return state;
+          const targetIdx = direction === "up" ? idx + 1 : idx - 1;
+          if (targetIdx < 0 || targetIdx >= list.length) return state;
+          const [moved] = list.splice(idx, 1);
+          list.splice(targetIdx, 0, moved);
+          return {
+            certConfig: {
+              ...state.certConfig,
+              elements: list,
+            },
+          };
+        });
+      },
+
+      customRecipients: {},
+      addCustomRecipients: (eventId, recipients) => {
+        set((state) => ({
+          customRecipients: {
+            ...state.customRecipients,
+            [eventId]: [...(state.customRecipients[eventId] || []), ...recipients],
+          },
+        }));
+      },
+      replaceCustomRecipients: (eventId, recipients) => {
+        set((state) => ({
+          customRecipients: {
+            ...state.customRecipients,
+            [eventId]: recipients,
+          },
+        }));
+      },
+      clearCustomRecipients: (eventId) => {
+        set((state) => {
+          const next = { ...state.customRecipients };
+          delete next[eventId];
+          return { customRecipients: next };
+        });
+      },
+
+      generatedCertificates: [],
+      generateAllCertificates: (eventId, recipients, eventTitle) => {
+        const templateConfig: CertificateConfig = {
+          ...get().certConfig,
+          eventId,
+        };
+        const batch = generateBulkCertificates(templateConfig, recipients, eventTitle);
+        set((state) => ({
+          generatedCertificates: [
+            ...state.generatedCertificates.filter((c) => c.eventId !== eventId),
+            ...batch,
+          ],
+        }));
+        return batch;
+      },
+      clearGeneratedCertificates: (eventId) => {
+        set((state) => ({
+          generatedCertificates: state.generatedCertificates.filter((c) => c.eventId !== eventId),
+        }));
+      },
 
       resetAll: () => {
         set({
           events: INITIAL_EVENTS,
           rubrics: INITIAL_RUBRICS,
-          certConfig: {
-            eventId: "hack-ai-2026",
-            backgroundDataUrl: "",
-            elements: DEFAULT_CANVAS_ELEMENTS,
-            width: 1920,
-            height: 1080,
-          },
+          certConfig: DEFAULT_CERT_CONFIG,
+          customRecipients: {},
+          generatedCertificates: [],
         });
       },
     }),
     {
-      name: "festra-workspace-v2",
+      name: "festra-workspace-v3",
+      partialize: (state) => ({
+        viewMode: state.viewMode,
+        activeSection: state.activeSection,
+        selectedEventId: state.selectedEventId,
+        events: state.events,
+        teams: state.teams,
+        submissions: state.submissions,
+        rubrics: state.rubrics,
+        judgeScores: state.judgeScores,
+        certConfig: state.certConfig,
+        customRecipients: state.customRecipients,
+      }),
     }
   )
 );
