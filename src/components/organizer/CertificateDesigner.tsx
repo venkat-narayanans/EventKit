@@ -53,6 +53,7 @@ import {
   Sparkles,
   Square,
   Trash2,
+  Trophy,
   Type,
   Unlock,
   Upload,
@@ -97,8 +98,9 @@ const BORDER_OPTIONS: Array<{ id: CertificateBorderStyle; label: string }> = [
 const VARIABLE_TOKENS = [
   { label: "Student Name", token: "{{participant_name}}" },
   { label: "Team / Squad", token: "{{team_name}}" },
+  { label: "Project Title", token: "{{project_title}}" },
+  { label: "Leaderboard Place", token: "{{leaderboard_place}}" },
   { label: "College", token: "{{college_name}}" },
-  { label: "Award / Role", token: "{{award_role}}" },
   { label: "Event Title", token: "{{event_title}}" },
   { label: "Cert ID", token: "{{certificate_id}}" },
   { label: "Issue Date", token: "{{issue_date}}" },
@@ -119,20 +121,30 @@ export const CertificateDesigner: React.FC = () => {
     teams,
     judgeScores,
     selectedEventId,
+    setActiveSection,
+    finalizedLeaderboards,
+    certStudioView,
+    setCertStudioView,
+    certGalleryTab,
+    setCertGalleryTab,
     customRecipients,
     addCustomRecipients,
     replaceCustomRecipients,
     clearCustomRecipients,
     generatedCertificates,
     generateAllCertificates,
+    generateWinnerCertificatesFromLeaderboard,
+    markCertificateEmailsSent,
   } = useStore();
 
   const currentEvent = events.find((e) => e.id === selectedEventId) || events[0];
   const eventId = currentEvent?.id || "hack-ai-2026";
   const eventTitle = currentEvent?.title || "HackCampus 2026";
+  const isLeaderboardFinalized = Boolean(finalizedLeaderboards[eventId]);
 
-  // View mode: Editor vs Generated Bulk Certificates Page
-  const [studioView, setStudioView] = useState<"editor" | "gallery">("editor");
+  // View mode synced with store so Leaderboard -> "Generate Certificates for Winners" opens Gallery directly
+  const studioView = certStudioView;
+  const setStudioView = setCertStudioView;
   const [leftTab, setLeftTab] = useState<"templates" | "assets" | "text" | "layers">("templates");
   const [selectedElementId, setSelectedElementId] = useState<string | null>(
     certConfig.elements[0]?.id || null
@@ -172,6 +184,16 @@ export const CertificateDesigner: React.FC = () => {
   const eventGeneratedCerts = useMemo(
     () => generatedCertificates.filter((c) => c.eventId === eventId),
     [generatedCertificates, eventId]
+  );
+
+  const participationCerts = useMemo(
+    () => eventGeneratedCerts.filter((c) => c.batchType !== "winner"),
+    [eventGeneratedCerts]
+  );
+
+  const winnerCerts = useMemo(
+    () => eventGeneratedCerts.filter((c) => c.batchType === "winner"),
+    [eventGeneratedCerts]
   );
 
   const safePreviewIdx =
@@ -374,7 +396,7 @@ export const CertificateDesigner: React.FC = () => {
     }
   };
 
-  // 1-CLICK BULK GENERATION ENGINE
+  // 1-CLICK PARTICIPATION BULK GENERATION (Identical content, ONLY student name & ID change!)
   const handleGenerateAllCertificates = () => {
     if (allRecipients.length === 0) {
       setIsRosterModalOpen(true);
@@ -385,7 +407,6 @@ export const CertificateDesigner: React.FC = () => {
     setTimeout(() => {
       generateAllCertificates(eventId, allRecipients, eventTitle);
       setIsGenerating(false);
-      setStudioView("gallery");
       confetti({
         particleCount: 95,
         spread: 70,
@@ -393,9 +414,27 @@ export const CertificateDesigner: React.FC = () => {
         colors: ["#2563eb", "#38bdf8", "#f59e0b", "#10b981", "#ffffff"],
       });
       showToast(
-        `Generated ${allRecipients.length} personalized certificates from your sample design!`
+        `Generated ${allRecipients.length} uniform Participation certificates — same design, unique student names!`
       );
-    }, 350);
+    }, 300);
+  };
+
+  // 1-CLICK WINNER CERTIFICATES GENERATION (From Finalized Leaderboard)
+  const handleGenerateWinnerCertificates = () => {
+    if (!isLeaderboardFinalized) {
+      setActiveSection("leaderboard");
+      return;
+    }
+    const created = generateWinnerCertificatesFromLeaderboard(eventId);
+    confetti({
+      particleCount: 110,
+      spread: 75,
+      origin: { y: 0.55 },
+      colors: ["#f59e0b", "#2563eb", "#10b981", "#ffffff"],
+    });
+    showToast(
+      `Generated ${created.length} Winner certificates with Leaderboard Place, Team Name & Project Title!`
+    );
   };
 
   // Load 50 realistic registered participants with 1 click
@@ -537,17 +576,34 @@ export const CertificateDesigner: React.FC = () => {
             <span>Roster ({allRecipients.length})</span>
           </button>
 
-          {/* HERO 1-CLICK GENERATE ALL CERTIFICATES BUTTON */}
+          {/* HERO 1-CLICK PARTICIPATION BULK GENERATE BUTTON */}
           <button
             onClick={handleGenerateAllCertificates}
             disabled={isGenerating}
-            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2 font-fortnite text-base tracking-wide text-white hover:bg-blue-700 transition shadow-md shadow-blue-600/20 min-h-[38px] disabled:opacity-70"
+            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 font-fortnite text-sm sm:text-base tracking-wide text-white hover:bg-blue-700 transition shadow-md shadow-blue-600/20 min-h-[38px] disabled:opacity-70"
           >
             <Wand2 className="h-4 w-4" />
             <span>
               {isGenerating
                 ? "GENERATING..."
-                : `GENERATE ALL ${allRecipients.length} CERTIFICATES`}
+                : `GENERATE PARTICIPATION (${allRecipients.length})`}
+            </span>
+          </button>
+
+          {/* WINNER CERTIFICATES FROM FINALIZED LEADERBOARD BUTTON */}
+          <button
+            onClick={handleGenerateWinnerCertificates}
+            className={`flex items-center gap-1.5 rounded-xl px-4 py-2 font-fortnite text-sm sm:text-base tracking-wide transition shadow-sm min-h-[38px] ${
+              isLeaderboardFinalized
+                ? "bg-amber-500 text-slate-950 hover:bg-amber-400"
+                : "border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+            }`}
+          >
+            <Trophy className="h-4 w-4" />
+            <span>
+              {isLeaderboardFinalized
+                ? "GENERATE WINNERS"
+                : "FINALIZE LEADERBOARD → WINNERS"}
             </span>
           </button>
         </div>
@@ -555,42 +611,18 @@ export const CertificateDesigner: React.FC = () => {
 
       {/* VIEW 2: GENERATED CERTIFICATES GALLERY PAGE */}
       {studioView === "gallery" ? (
-        eventGeneratedCerts.length > 0 ? (
-          <CertificateGallery
-            certificates={eventGeneratedCerts}
-            onBackToEditor={() => setStudioView("editor")}
-            onRegenerate={handleGenerateAllCertificates}
-          />
-        ) : (
-          <div className="rounded-3xl border border-blue-100 bg-white p-12 text-center space-y-4 shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Sparkles className="h-7 w-7" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-fortnite text-2xl text-blue-950 uppercase tracking-wide">
-                NO BULK CERTIFICATES GENERATED YET
-              </h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Customize your sample certificate in the editor, load your participant roster ({allRecipients.length} ready), and click the button below to generate every student&apos;s personalized certificate in 1 click.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-              <button
-                onClick={() => setStudioView("editor")}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Back to Designer
-              </button>
-              <button
-                onClick={handleGenerateAllCertificates}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 shadow-sm"
-              >
-                <Wand2 className="h-4 w-4" />
-                <span>GENERATE ALL {allRecipients.length} CERTIFICATES NOW</span>
-              </button>
-            </div>
-          </div>
-        )
+        <CertificateGallery
+          participationCerts={participationCerts}
+          winnerCerts={winnerCerts}
+          activeTab={certGalleryTab}
+          onChangeTab={setCertGalleryTab}
+          isLeaderboardFinalized={isLeaderboardFinalized}
+          onBackToEditor={() => setStudioView("editor")}
+          onRegenerateParticipation={handleGenerateAllCertificates}
+          onGenerateWinners={handleGenerateWinnerCertificates}
+          onGoToLeaderboard={() => setActiveSection("leaderboard")}
+          onMarkEmailsSent={markCertificateEmailsSent}
+        />
       ) : (
         /* VIEW 1: CANVA-STYLE 3-PANE SAMPLE DESIGN STUDIO */
         <div className="grid gap-4 lg:grid-cols-12 items-start">

@@ -186,6 +186,8 @@ export interface CertificateConfig {
   height: number;
 }
 
+export type CertificateBatchType = "participation" | "winner";
+
 export interface CertificateRecipient {
   id: string;
   name: string;
@@ -193,17 +195,23 @@ export interface CertificateRecipient {
   teamName: string;
   collegeName: string;
   awardRole: string;
+  projectTitle?: string;
+  leaderboardPlace?: string; // e.g. "1st Place — Grand Prize Winner"
+  leaderboardRank?: number; // 1, 2, 3
+  certificateType?: CertificateBatchType;
   certificateCode: string;
   verificationHash: string;
   issueDate: string;
-  source: "registration" | "imported";
+  source: "registration" | "imported" | "leaderboard";
 }
 
 export interface GeneratedCertificate {
   id: string;
   eventId: string;
   eventTitle: string;
+  batchType: CertificateBatchType;
   recipient: CertificateRecipient;
   generatedAt: string;
+  emailSentAt?: string;
   templateSnapshot: CertificateConfig;
 }

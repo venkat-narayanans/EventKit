@@ -5,12 +5,15 @@ import {
   generateLinkedInCertificateUrl,
   CERTIFICATE_TEMPLATES,
   buildSample50Recipients,
+  buildWinnerRecipientsFromLeaderboard,
+  buildWinnerTemplateFromBase,
+  buildMailtoLink,
   generateBulkCertificates,
   resolveElementText,
   parseRecipientsFromText,
   renderCertificateToSvg,
 } from "../certificate";
-import { CanvasElement } from "@/types";
+import { CanvasElement, Event, JudgeScore, MilestoneSubmission, RegisteredTeam } from "@/types";
 
 describe("Verifiable Certificate & Typography Engine", () => {
   it("generates deterministic tamper-proof hashes for valid credentials", () => {
@@ -102,9 +105,149 @@ describe("Verifiable Certificate & Typography Engine", () => {
 
     expect(firstSvg).toContain("Karthik Raja");
     expect(firstSvg).toContain("FAKE_LOGO_DATA");
+    expect(firstSvg).toContain("CERTIFICATE OF PARTICIPATION");
+    expect(firstSvg).toContain("For Actively Participating in HackCampus 2026");
+    expect(firstSvg).not.toContain("1st Place");
     expect(fiftiethSvg).toContain("Ishita Roy");
     expect(fiftiethSvg).toContain("FAKE_LOGO_DATA");
+    expect(fiftiethSvg).toContain("For Actively Participating in HackCampus 2026");
     expect(firstSvg).not.toContain("Ishita Roy");
+  });
+
+  it("generates Winner Certificates from finalized Leaderboard with Place, Team Name, Project Title & Registered Emails", () => {
+    const mockEvent = {
+      id: "hack-ai-2026",
+      title: "HackCampus 2026",
+    } as Event;
+
+    const mockTeams: RegisteredTeam[] = [
+      {
+        id: "tm-1",
+        eventId: "hack-ai-2026",
+        teamName: "Nexus Protocol",
+        leaderName: "Karthik Raja",
+        leaderEmail: "karthik@nitt.edu",
+        collegeName: "NIT Trichy",
+        members: [
+          { id: "m1", name: "Karthik Raja", email: "karthik@nitt.edu", college: "NIT Trichy", role: "lead" },
+          { id: "m2", name: "Sneha Nair", email: "sneha@nitt.edu", college: "NIT Trichy", role: "member" },
+        ],
+        ticketId: "CF-TKT-9011",
+        paymentStatus: "verified",
+        registeredAt: "2026-11-14T10:30:00Z",
+        checkedIn: true,
+      },
+      {
+        id: "tm-2",
+        eventId: "hack-ai-2026",
+        teamName: "Aether Systems",
+        leaderName: "Rohan Verma",
+        leaderEmail: "rohan@iitm.ac.in",
+        collegeName: "IIT Madras",
+        members: [
+          { id: "m3", name: "Rohan Verma", email: "rohan@iitm.ac.in", college: "IIT Madras", role: "lead" },
+        ],
+        ticketId: "CF-TKT-9012",
+        paymentStatus: "verified",
+        registeredAt: "2026-11-14T11:15:00Z",
+        checkedIn: true,
+      },
+    ];
+
+    const mockSubmissions: MilestoneSubmission[] = [
+      {
+        id: "sub-1",
+        teamId: "tm-1",
+        teamName: "Nexus Protocol",
+        eventId: "hack-ai-2026",
+        phase: 3,
+        problemStatement: "Sub-second Decentralized Credit Scoring via Rust",
+        techStack: ["Rust"],
+        githubRepoUrl: "https://github.com/nexus/core",
+        commitsCount: 40,
+        submittedAt: "2026-11-14T14:00:00Z",
+      },
+      {
+        id: "sub-2",
+        teamId: "tm-2",
+        teamName: "Aether Systems",
+        eventId: "hack-ai-2026",
+        phase: 3,
+        problemStatement: "Distributed Edge Consensus for Swarms",
+        techStack: ["Go"],
+        githubRepoUrl: "https://github.com/aether/swarm",
+        commitsCount: 30,
+        submittedAt: "2026-11-14T14:30:00Z",
+      },
+    ];
+
+    const mockScores: JudgeScore[] = [
+      {
+        id: "sc-1",
+        eventId: "hack-ai-2026",
+        teamId: "tm-1",
+        teamName: "Nexus Protocol",
+        judgeName: "Dr. K",
+        scores: { r1: 9.5 },
+        totalRaw: 95,
+        evaluatedAt: "2026-11-14T15:00:00Z",
+      },
+      {
+        id: "sc-2",
+        eventId: "hack-ai-2026",
+        teamId: "tm-2",
+        teamName: "Aether Systems",
+        judgeName: "Dr. K",
+        scores: { r1: 8.8 },
+        totalRaw: 88,
+        evaluatedAt: "2026-11-14T15:10:00Z",
+      },
+    ];
+
+    const winners = buildWinnerRecipientsFromLeaderboard(
+      mockTeams,
+      mockScores,
+      mockSubmissions,
+      mockEvent,
+      3
+    );
+
+    expect(winners.length).toBe(3); // 2 members in #1 team + 1 member in #2 team
+    expect(winners[0].name).toBe("Karthik Raja");
+    expect(winners[0].email).toBe("karthik@nitt.edu");
+    expect(winners[0].leaderboardRank).toBe(1);
+    expect(winners[0].leaderboardPlace).toContain("1st Place");
+    expect(winners[0].projectTitle).toBe("Sub-second Decentralized Credit Scoring via Rust");
+
+    expect(winners[2].name).toBe("Rohan Verma");
+    expect(winners[2].email).toBe("rohan@iitm.ac.in");
+    expect(winners[2].leaderboardRank).toBe(2);
+    expect(winners[2].leaderboardPlace).toContain("2nd Place");
+
+    const winnerTemplate = buildWinnerTemplateFromBase({
+      eventId: "hack-ai-2026",
+      ...CERTIFICATE_TEMPLATES[0].config,
+    });
+    const winnerCerts = generateBulkCertificates(
+      winnerTemplate,
+      winners,
+      "HackCampus 2026",
+      "winner"
+    );
+
+    const svg1 = renderCertificateToSvg(
+      winnerCerts[0].templateSnapshot,
+      winnerCerts[0].recipient,
+      winnerCerts[0].eventTitle
+    );
+    expect(svg1).toContain("Karthik Raja");
+    expect(svg1).toContain("1ST PLACE");
+    expect(svg1).toContain("Nexus Protocol");
+    expect(svg1).toContain("Sub-second Decentralized Credit Scoring via Rust");
+
+    const mailto = buildMailtoLink(winnerCerts[0]);
+    expect(mailto).toContain("mailto:karthik%40nitt.edu");
+    expect(mailto).toContain("Sub-second");
   });
 
   it("substitutes both explicit {{tokens}} and smart name fields automatically", () => {

@@ -15,6 +15,8 @@ import {
   CERTIFICATE_TEMPLATES,
   CERT_CANVAS_HEIGHT,
   CERT_CANVAS_WIDTH,
+  buildWinnerRecipientsFromLeaderboard,
+  buildWinnerTemplateFromBase,
   generateBulkCertificates,
 } from "./certificate";
 
@@ -158,7 +160,16 @@ interface FestraStore {
   judgeScores: JudgeScore[];
   submitScore: (score: Omit<JudgeScore, "id" | "evaluatedAt" | "totalRaw">) => void;
 
+  // Leaderboard Finalization
+  finalizedLeaderboards: Record<string, boolean>;
+  toggleFinalizeLeaderboard: (eventId: string, finalized: boolean) => void;
+
   // Certificate Studio (Canva-Grade BYOD + Bulk Generation)
+  certStudioView: "editor" | "gallery";
+  setCertStudioView: (view: "editor" | "gallery") => void;
+  certGalleryTab: "participation" | "winner";
+  setCertGalleryTab: (tab: "participation" | "winner") => void;
+
   certConfig: CertificateConfig;
   updateCertConfig: (updates: Partial<CertificateConfig>) => void;
   applyCertTemplate: (config: CertificateConfig) => void;
@@ -169,7 +180,7 @@ interface FestraStore {
   duplicateCertElement: (id: string) => string | null;
   reorderCertElement: (id: string, direction: "up" | "down") => void;
 
-  // Bulk Recipients & Generated Certificates
+  // Bulk Recipients & Generated Certificates (Participation + Winners)
   customRecipients: Record<string, CertificateRecipient[]>;
   addCustomRecipients: (eventId: string, recipients: CertificateRecipient[]) => void;
   replaceCustomRecipients: (eventId: string, recipients: CertificateRecipient[]) => void;
@@ -180,6 +191,8 @@ interface FestraStore {
     recipients: CertificateRecipient[],
     eventTitle: string
   ) => GeneratedCertificate[];
+  generateWinnerCertificatesFromLeaderboard: (eventId: string) => GeneratedCertificate[];
+  markCertificateEmailsSent: (certIds: string[]) => void;
   clearGeneratedCertificates: (eventId: string) => void;
 
   // Reset to initial clean state
@@ -254,12 +267,30 @@ export const useStore = create<FestraStore>()(
           collegeName: "IIT Madras",
           members: [
             { id: "m3", name: "Rohan Verma", email: "rohan@iitm.ac.in", college: "IIT Madras", role: "lead" },
+            { id: "m4", name: "Ananya Iyer", email: "ananya@iitm.ac.in", college: "IIT Madras", role: "member" },
           ],
           ticketId: "CF-TKT-9012",
           paymentStatus: "verified",
           utrNumber: "432190887456",
           registeredAt: "2026-11-14T11:15:00Z",
-          checkedIn: false,
+          checkedIn: true,
+        },
+        {
+          id: "tm-3",
+          eventId: "hack-ai-2026",
+          teamName: "Quantum Drift",
+          leaderName: "Aditya Krishnan",
+          leaderEmail: "aditya@nitk.edu.in",
+          collegeName: "NIT Surathkal",
+          members: [
+            { id: "m5", name: "Aditya Krishnan", email: "aditya@nitk.edu.in", college: "NIT Surathkal", role: "lead" },
+            { id: "m6", name: "Diya Menon", email: "diya@nitk.edu.in", college: "NIT Surathkal", role: "member" },
+          ],
+          ticketId: "CF-TKT-9013",
+          paymentStatus: "verified",
+          utrNumber: "432190887789",
+          registeredAt: "2026-11-14T11:45:00Z",
+          checkedIn: true,
         },
       ],
       registerTeam: (teamData) => {
@@ -294,13 +325,41 @@ export const useStore = create<FestraStore>()(
           teamName: "Nexus Protocol",
           eventId: "hack-ai-2026",
           phase: 3,
-          problemStatement: "Sub-second decentralized credit scoring via Rust & WASM",
+          problemStatement: "Sub-second Decentralized Credit Scoring via Rust & WASM",
           techStack: ["Rust", "WASM", "Next.js", "Postgres"],
           githubRepoUrl: "https://github.com/nexus-protocol/credit-core",
           liveDemoUrl: "https://nexus-demo.vercel.app",
           presentationDeckUrl: "https://cdn.example.com/nexus-deck.pdf",
           commitsCount: 42,
           submittedAt: "2026-11-14T14:20:00Z",
+        },
+        {
+          id: "sub-2",
+          teamId: "tm-2",
+          teamName: "Aether Systems",
+          eventId: "hack-ai-2026",
+          phase: 3,
+          problemStatement: "Distributed Edge Consensus for Multi-Agent Swarm Coordination",
+          techStack: ["Go", "Libp2p", "React", "WebSockets"],
+          githubRepoUrl: "https://github.com/aether-systems/swarm-consensus",
+          liveDemoUrl: "https://aether-swarm.vercel.app",
+          presentationDeckUrl: "https://cdn.example.com/aether-deck.pdf",
+          commitsCount: 36,
+          submittedAt: "2026-11-14T14:45:00Z",
+        },
+        {
+          id: "sub-3",
+          teamId: "tm-3",
+          teamName: "Quantum Drift",
+          eventId: "hack-ai-2026",
+          phase: 3,
+          problemStatement: "Real-Time Neural Traffic Flow Optimizer for Smart Campuses",
+          techStack: ["Python", "PyTorch", "FastAPI", "Next.js"],
+          githubRepoUrl: "https://github.com/quantum-drift/neural-traffic",
+          liveDemoUrl: "https://quantum-drift.vercel.app",
+          presentationDeckUrl: "https://cdn.example.com/quantum-deck.pdf",
+          commitsCount: 29,
+          submittedAt: "2026-11-14T15:05:00Z",
         },
       ],
       submitMilestone: (subData) => {
@@ -340,14 +399,48 @@ export const useStore = create<FestraStore>()(
           judgeName: "Dr. K. Ramanathan",
           scores: {
             "r-tech": 9.5,
+            "r-novelty": 9.5,
+            "r-ux": 9.0,
+            "r-pitch": 9.5,
+          },
+          totalRaw: 94.0,
+          normalizedScore: 95.0,
+          feedback: "Outstanding Rust + WASM architecture and sub-second benchmarks.",
+          evaluatedAt: "2026-11-14T15:00:00Z",
+        },
+        {
+          id: "sc-2",
+          eventId: "hack-ai-2026",
+          teamId: "tm-2",
+          teamName: "Aether Systems",
+          judgeName: "Dr. K. Ramanathan",
+          scores: {
+            "r-tech": 9.0,
             "r-novelty": 9.0,
             "r-ux": 8.5,
             "r-pitch": 9.0,
           },
-          totalRaw: 90.75,
-          normalizedScore: 91.2,
-          feedback: "Solid systems architecture and clean Rust benchmarks.",
-          evaluatedAt: "2026-11-14T15:00:00Z",
+          totalRaw: 89.0,
+          normalizedScore: 90.0,
+          feedback: "Impressive distributed edge consensus and resilient swarm demo.",
+          evaluatedAt: "2026-11-14T15:10:00Z",
+        },
+        {
+          id: "sc-3",
+          eventId: "hack-ai-2026",
+          teamId: "tm-3",
+          teamName: "Quantum Drift",
+          judgeName: "Dr. K. Ramanathan",
+          scores: {
+            "r-tech": 8.5,
+            "r-novelty": 8.5,
+            "r-ux": 8.5,
+            "r-pitch": 8.0,
+          },
+          totalRaw: 84.0,
+          normalizedScore: 85.0,
+          feedback: "Strong neural optimization model with clear campus impact.",
+          evaluatedAt: "2026-11-14T15:20:00Z",
         },
       ],
       submitScore: (scoreData) => {
@@ -363,6 +456,21 @@ export const useStore = create<FestraStore>()(
           judgeScores: [newScore, ...state.judgeScores.filter((s) => s.teamId !== scoreData.teamId || s.judgeName !== scoreData.judgeName)],
         }));
       },
+
+      finalizedLeaderboards: {},
+      toggleFinalizeLeaderboard: (eventId, finalized) => {
+        set((state) => ({
+          finalizedLeaderboards: {
+            ...state.finalizedLeaderboards,
+            [eventId]: finalized,
+          },
+        }));
+      },
+
+      certStudioView: "editor",
+      setCertStudioView: (view) => set({ certStudioView: view }),
+      certGalleryTab: "participation",
+      setCertGalleryTab: (tab) => set({ certGalleryTab: tab }),
 
       certConfig: DEFAULT_CERT_CONFIG,
       updateCertConfig: (updates) => {
@@ -487,14 +595,72 @@ export const useStore = create<FestraStore>()(
           ...get().certConfig,
           eventId,
         };
-        const batch = generateBulkCertificates(templateConfig, recipients, eventTitle);
+        const batch = generateBulkCertificates(
+          templateConfig,
+          recipients,
+          eventTitle,
+          "participation"
+        );
         set((state) => ({
           generatedCertificates: [
-            ...state.generatedCertificates.filter((c) => c.eventId !== eventId),
+            // Keep winner certificates untouched when regenerating participation certificates!
+            ...state.generatedCertificates.filter(
+              (c) => !(c.eventId === eventId && c.batchType === "participation")
+            ),
             ...batch,
           ],
+          certStudioView: "gallery",
+          certGalleryTab: "participation",
         }));
         return batch;
+      },
+      generateWinnerCertificatesFromLeaderboard: (eventId) => {
+        const state = get();
+        const event = state.events.find((e) => e.id === eventId) || state.events[0];
+        const eventTitle = event?.title || "HackCampus 2026";
+        const winners = buildWinnerRecipientsFromLeaderboard(
+          state.teams,
+          state.judgeScores,
+          state.submissions,
+          event,
+          3
+        );
+        const winnerTemplate = buildWinnerTemplateFromBase({
+          ...state.certConfig,
+          eventId,
+        });
+        const batch = generateBulkCertificates(
+          winnerTemplate,
+          winners,
+          eventTitle,
+          "winner"
+        );
+        set((prev) => ({
+          finalizedLeaderboards: {
+            ...prev.finalizedLeaderboards,
+            [eventId]: true,
+          },
+          generatedCertificates: [
+            // Keep participation certificates untouched when generating winner certificates!
+            ...prev.generatedCertificates.filter(
+              (c) => !(c.eventId === eventId && c.batchType === "winner")
+            ),
+            ...batch,
+          ],
+          activeSection: "certificates",
+          certStudioView: "gallery",
+          certGalleryTab: "winner",
+        }));
+        return batch;
+      },
+      markCertificateEmailsSent: (certIds) => {
+        const idSet = new Set(certIds);
+        const sentTimestamp = new Date().toISOString();
+        set((state) => ({
+          generatedCertificates: state.generatedCertificates.map((c) =>
+            idSet.has(c.id) ? { ...c, emailSentAt: sentTimestamp } : c
+          ),
+        }));
       },
       clearGeneratedCertificates: (eventId) => {
         set((state) => ({
@@ -509,11 +675,14 @@ export const useStore = create<FestraStore>()(
           certConfig: DEFAULT_CERT_CONFIG,
           customRecipients: {},
           generatedCertificates: [],
+          finalizedLeaderboards: {},
+          certStudioView: "editor",
+          certGalleryTab: "participation",
         });
       },
     }),
     {
-      name: "festra-workspace-v3",
+      name: "festra-workspace-v4",
       partialize: (state) => ({
         viewMode: state.viewMode,
         activeSection: state.activeSection,
@@ -523,6 +692,7 @@ export const useStore = create<FestraStore>()(
         submissions: state.submissions,
         rubrics: state.rubrics,
         judgeScores: state.judgeScores,
+        finalizedLeaderboards: state.finalizedLeaderboards,
         certConfig: state.certConfig,
         customRecipients: state.customRecipients,
       }),

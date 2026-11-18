@@ -1,11 +1,13 @@
 import {
   CanvasElement,
   CanvasElementKind,
+  CertificateBatchType,
   CertificateConfig,
   CertificateRecipient,
   Event,
   GeneratedCertificate,
   JudgeScore,
+  MilestoneSubmission,
   RegisteredTeam,
 } from "@/types";
 
@@ -112,8 +114,9 @@ export function getElementKind(el: CanvasElement): CanvasElementKind {
 
 /**
  * Resolves dynamic mail-merge variables for a given certificate element & recipient.
- * Even if the organizer typed a sample name in the "Participant Name" layer without {{participant_name}},
- * bulk generation automatically substitutes that layer with each student's name.
+ * - For Participation certificates: Keeps ALL wording uniform across every participant;
+ *   only the student's name ({{participant_name}} / type==="name") and verification ID change!
+ * - For Winner certificates: Auto-fills leaderboard place, team name, project title, and member name.
  */
 export function resolveElementText(
   el: CanvasElement,
@@ -131,31 +134,45 @@ export function resolveElementText(
       .replace(/\{\{college_name\}\}/gi, recipient.collegeName)
       .replace(/\{\{event_title\}\}/gi, eventTitle)
       .replace(/\{\{award_role\}\}/gi, recipient.awardRole)
+      .replace(
+        /\{\{leaderboard_place\}\}/gi,
+        recipient.leaderboardPlace || recipient.awardRole
+      )
+      .replace(
+        /\{\{leaderboard_rank\}\}/gi,
+        recipient.leaderboardRank ? `#${recipient.leaderboardRank}` : ""
+      )
+      .replace(
+        /\{\{project_title\}\}/gi,
+        recipient.projectTitle || "Verified Technical Project"
+      )
       .replace(/\{\{certificate_id\}\}/gi, recipient.certificateCode)
       .replace(/\{\{issue_date\}\}/gi, recipient.issueDate);
   }
 
-  // Automatic smart binding for semantic fields so 1-click generation works out of the box
+  // Automatic smart binding so 1-click generation always changes the student name & QR code
   if (el.type === "name") {
     return recipient.name;
   }
-  if (el.type === "role") {
-    return `${recipient.awardRole} — ${eventTitle}`;
-  }
   if (el.type === "qr") {
     return `VERIFY: ${recipient.certificateCode}`;
+  }
+  // Only override static role text for Winner batches; keep Participation wording 100% uniform!
+  if (el.type === "role" && recipient.certificateType === "winner") {
+    return `${recipient.leaderboardPlace || recipient.awardRole} — ${eventTitle}`;
   }
 
   return el.text;
 }
 
 /**
- * Extracts individual participants from registered teams + imported roster,
- * auto-computes leaderboard award roles, and assigns unique certificate IDs & SHA-256 hashes.
+ * Extracts individual participants from registered teams + imported roster for uniform
+ * PARTICIPATION certificates (every student gets the exact same participation content,
+ * with ONLY their student name & unique verification code personalized).
  */
 export function buildRecipientsFromEvent(
   teams: RegisteredTeam[],
-  judgeScores: JudgeScore[],
+  _judgeScores: JudgeScore[],
   event: Event | undefined,
   extraRecipients: CertificateRecipient[] = []
 ): CertificateRecipient[] {
@@ -166,30 +183,7 @@ export function buildRecipientsFromEvent(
     year: "numeric",
   });
 
-  // Compute team rankings from judgeScores for auto award labels
-  const scoreMap = new Map<string, { sum: number; count: number }>();
-  judgeScores
-    .filter((s) => s.eventId === eventId)
-    .forEach((sc) => {
-      const prev = scoreMap.get(sc.teamId) || { sum: 0, count: 0 };
-      prev.sum += sc.totalRaw;
-      prev.count += 1;
-      scoreMap.set(sc.teamId, prev);
-    });
-
-  const rankedTeamIds = Array.from(scoreMap.entries())
-    .map(([teamId, v]) => ({ teamId, avg: v.sum / v.count }))
-    .sort((a, b) => b.avg - a.avg)
-    .map((x) => x.teamId);
-
-  const getAwardForTeam = (teamId: string): string => {
-    const rankIdx = rankedTeamIds.indexOf(teamId);
-    if (rankIdx === 0) return "1st Place — Grand Prize Winner";
-    if (rankIdx === 1) return "2nd Place — First Runner-Up";
-    if (rankIdx === 2) return "3rd Place — Second Runner-Up";
-    return "Certificate of Active Participation";
-  };
-
+  const uniformRole = "Certificate of Active Participation";
   const recipients: CertificateRecipient[] = [];
   const seenKeys = new Set<string>();
   let seq = 1;
@@ -210,8 +204,6 @@ export function buildRecipientsFromEvent(
             },
           ];
 
-    const awardRole = getAwardForTeam(team.id);
-
     for (const member of members) {
       const key = `${member.name.toLowerCase()}::${team.teamName.toLowerCase()}`;
       if (seenKeys.has(key)) continue;
@@ -225,9 +217,15 @@ export function buildRecipientsFromEvent(
         email: member.email || team.leaderEmail,
         teamName: team.teamName,
         collegeName: member.college || team.collegeName,
-        awardRole,
+        awardRole: uniformRole,
+        certificateType: "participation",
         certificateCode: code,
-        verificationHash: generateVerificationHash(code, member.email || member.name, eventId, awardRole),
+        verificationHash: generateVerificationHash(
+          code,
+          member.email || member.name,
+          eventId,
+          uniformRole
+        ),
         issueDate,
         source: "registration",
       });
@@ -243,12 +241,14 @@ export function buildRecipientsFromEvent(
     seq++;
     recipients.push({
       ...extra,
+      awardRole: uniformRole,
+      certificateType: "participation",
       certificateCode: code,
       verificationHash: generateVerificationHash(
         code,
         extra.email || extra.name,
         eventId,
-        extra.awardRole
+        uniformRole
       ),
       issueDate: extra.issueDate || issueDate,
     });
@@ -258,12 +258,354 @@ export function buildRecipientsFromEvent(
 }
 
 /**
+ * Extracts Winner Certificate recipients directly from the Finalized Leaderboard standings,
+ * pulling each winning team's Place (#1, #2, #3), Team Name, Project Title (from Submissions),
+ * and every team member's Name & Registered Email ID!
+ */
+export function buildWinnerRecipientsFromLeaderboard(
+  teams: RegisteredTeam[],
+  judgeScores: JudgeScore[],
+  submissions: MilestoneSubmission[],
+  event: Event | undefined,
+  topN: number = 3
+): CertificateRecipient[] {
+  const eventId = event?.id || "hack-ai-2026";
+  const issueDate = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  // Aggregate scores per team exactly matching LeaderboardManager
+  const teamScoreMap = new Map<
+    string,
+    { teamName: string; totalRaw: number; count: number }
+  >();
+
+  judgeScores
+    .filter((s) => s.eventId === eventId)
+    .forEach((sc) => {
+      const existing = teamScoreMap.get(sc.teamId) || {
+        teamName: sc.teamName,
+        totalRaw: 0,
+        count: 0,
+      };
+      existing.totalRaw += sc.totalRaw;
+      existing.count += 1;
+      teamScoreMap.set(sc.teamId, existing);
+    });
+
+  const rankedTeams = Array.from(teamScoreMap.entries())
+    .map(([teamId, data]) => {
+      const avgRaw = data.totalRaw / data.count;
+      const normalized = Math.min(100, Math.round(avgRaw * 1.01));
+      return { teamId, teamName: data.teamName, normalized, avgRaw };
+    })
+    .sort((a, b) => b.normalized - a.normalized)
+    .slice(0, topN);
+
+  const placeLabels = [
+    "1st Place — Grand Prize Winner",
+    "2nd Place — First Runner-Up",
+    "3rd Place — Second Runner-Up",
+  ];
+
+  const winners: CertificateRecipient[] = [];
+  let seq = 1;
+
+  rankedTeams.forEach((ranked, idx) => {
+    const rank = idx + 1;
+    const placeLabel = placeLabels[idx] || `#${rank} Place Finalist`;
+    const team = teams.find((t) => t.id === ranked.teamId && t.eventId === eventId) ||
+      teams.find((t) => t.teamName.toLowerCase() === ranked.teamName.toLowerCase());
+    const submission = submissions.find(
+      (s) =>
+        s.eventId === eventId &&
+        (s.teamId === ranked.teamId ||
+          s.teamName.toLowerCase() === ranked.teamName.toLowerCase())
+    );
+
+    const projectTitle =
+      submission?.problemStatement ||
+      `${ranked.teamName} — Winning Prototype`;
+    const collegeName =
+      team?.collegeName || "National Institute of Technology, Trichy";
+
+    const members =
+      team?.members && team.members.length > 0
+        ? team.members
+        : [
+            {
+              id: `win-lead-${ranked.teamId}`,
+              name: team?.leaderName || `${ranked.teamName} Lead`,
+              email:
+                team?.leaderEmail ||
+                `${ranked.teamName.toLowerCase().replace(/[^a-z0-9]+/g, ".")}@college.edu`,
+              college: collegeName,
+              role: "lead" as const,
+            },
+          ];
+
+    for (const member of members) {
+      const code = `FST-2026-W${String(seq).padStart(3, "0")}`;
+      seq++;
+      winners.push({
+        id: `rec-win-${ranked.teamId}-${member.id}`,
+        name: member.name,
+        email: member.email || team?.leaderEmail || "winner@college.edu",
+        teamName: team?.teamName || ranked.teamName,
+        collegeName: member.college || collegeName,
+        awardRole: placeLabel,
+        leaderboardPlace: placeLabel,
+        leaderboardRank: rank,
+        projectTitle,
+        certificateType: "winner",
+        certificateCode: code,
+        verificationHash: generateVerificationHash(
+          code,
+          member.email || member.name,
+          eventId,
+          placeLabel
+        ),
+        issueDate,
+        source: "leaderboard",
+      });
+    }
+  });
+
+  return winners;
+}
+
+/**
+ * Builds a dedicated Winner Certificate template starting from the organizer's current
+ * sample design (preserving uploaded College Logos, Dean Signatures, Custom Background,
+ * Borders, and Colors) while automatically binding Leaderboard Place, Team Name & Project Title!
+ */
+export function buildWinnerTemplateFromBase(
+  baseConfig: CertificateConfig
+): CertificateConfig {
+  // Preserve custom uploaded assets (logos, signature images) & user's branding
+  const preservedAssets = baseConfig.elements
+    .filter((el) => {
+      const k = getElementKind(el);
+      return k === "image" || el.type === "institution" || el.type === "signatures" || el.type === "date";
+    })
+    .map((el) => ({ ...el }));
+
+  const isDark = baseConfig.backgroundColor === "#0f172a";
+  const primaryInk = isDark ? "#ffffff" : "#0f172a";
+  const accentBlue = isDark ? "#38bdf8" : baseConfig.borderColor || "#2563eb";
+  const goldAccent = "#d97706";
+  const mutedInk = isDark ? "#94a3b8" : "#475569";
+
+  const hasInstitution = preservedAssets.some((e) => e.type === "institution");
+  const hasDate = preservedAssets.some((e) => e.type === "date");
+  const hasSignatures = preservedAssets.some((e) => e.type === "signatures");
+
+  const winnerElements: CanvasElement[] = [
+    ...preservedAssets,
+    {
+      id: "win-gold-seal",
+      kind: "badge",
+      type: "seal",
+      label: "Winner Gold Seal",
+      text: "",
+      xPercent: 90,
+      yPercent: 16,
+      fontSize: 16,
+      fontFamily: "Georgia, serif",
+      color: goldAccent,
+      fontWeight: "700",
+      widthPercent: 9.5,
+      heightPercent: 13.5,
+      badgeStyle: "gold_seal",
+      opacity: 1,
+      enabled: true,
+    },
+    ...(!hasInstitution
+      ? [
+          {
+            id: "win-institution",
+            kind: "text" as const,
+            type: "institution" as const,
+            label: "Host College / Institution",
+            text: "NATIONAL INSTITUTE OF TECHNOLOGY • DEPT. OF CSE",
+            xPercent: 50,
+            yPercent: 14,
+            fontSize: 16,
+            fontFamily: "Inter, sans-serif",
+            color: accentBlue,
+            fontWeight: "700",
+            letterSpacing: 2.5,
+            textTransform: "uppercase" as const,
+            enabled: true,
+          },
+        ]
+      : []),
+    {
+      id: "win-title",
+      kind: "text",
+      type: "event",
+      label: "Winner Title",
+      text: "CERTIFICATE OF EXCELLENCE",
+      xPercent: 50,
+      yPercent: 24,
+      fontSize: 52,
+      fontFamily: "'FortniteFont', 'Burbank Big Condensed Black', sans-serif",
+      color: primaryInk,
+      fontWeight: "900",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      enabled: true,
+    },
+    {
+      id: "win-place",
+      kind: "text",
+      type: "role",
+      label: "Leaderboard Place",
+      text: "{{leaderboard_place}} — {{event_title}}",
+      xPercent: 50,
+      yPercent: 34,
+      fontSize: 22,
+      fontFamily: "Inter, sans-serif",
+      color: goldAccent,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      enabled: true,
+    },
+    {
+      id: "win-name",
+      kind: "text",
+      type: "name",
+      label: "Winner Name",
+      text: "{{participant_name}}",
+      xPercent: 50,
+      yPercent: 47,
+      fontSize: 64,
+      fontFamily: "Georgia, serif",
+      color: isDark ? "#f8fafc" : "#1e3a8a",
+      fontWeight: "700",
+      fontStyle: "italic",
+      enabled: true,
+    },
+    {
+      id: "win-divider",
+      kind: "shape",
+      type: "divider",
+      label: "Gold Winner Rule",
+      text: "",
+      xPercent: 50,
+      yPercent: 55,
+      fontSize: 12,
+      fontFamily: "Inter, sans-serif",
+      color: goldAccent,
+      fontWeight: "400",
+      widthPercent: 44,
+      heightPercent: 0.45,
+      shapeType: "line",
+      opacity: 0.9,
+      enabled: true,
+    },
+    {
+      id: "win-team",
+      kind: "text",
+      type: "custom_text",
+      label: "Winning Team & College",
+      text: "Team: {{team_name}}  •  {{college_name}}",
+      xPercent: 50,
+      yPercent: 62,
+      fontSize: 20,
+      fontFamily: "Inter, sans-serif",
+      color: accentBlue,
+      fontWeight: "700",
+      enabled: true,
+    },
+    {
+      id: "win-project",
+      kind: "text",
+      type: "custom_text",
+      label: "Winning Project Title",
+      text: "Project: {{project_title}}",
+      xPercent: 50,
+      yPercent: 69,
+      fontSize: 17,
+      fontFamily: "Georgia, serif",
+      color: mutedInk,
+      fontWeight: "600",
+      fontStyle: "italic",
+      enabled: true,
+    },
+    ...(!hasDate
+      ? [
+          {
+            id: "win-date",
+            kind: "text" as const,
+            type: "date" as const,
+            label: "Issue Date",
+            text: "Issued on {{issue_date}}",
+            xPercent: 20,
+            yPercent: 85,
+            fontSize: 14,
+            fontFamily: "Inter, sans-serif",
+            color: mutedInk,
+            fontWeight: "600",
+            enabled: true,
+          },
+        ]
+      : []),
+    {
+      id: "win-qr",
+      kind: "qr",
+      type: "qr",
+      label: "Verification QR Badge",
+      text: "VERIFY: {{certificate_id}}",
+      xPercent: 50,
+      yPercent: 85,
+      fontSize: 12,
+      fontFamily: "monospace",
+      color: goldAccent,
+      fontWeight: "700",
+      widthPercent: 22,
+      heightPercent: 10,
+      enabled: true,
+    },
+    ...(!hasSignatures
+      ? [
+          {
+            id: "win-signatures",
+            kind: "text" as const,
+            type: "signatures" as const,
+            label: "Faculty Signatures",
+            text: "Dr. K. Ramanathan (HOD)  •  Dr. S. Meenakshi (Dean)",
+            xPercent: 80,
+            yPercent: 85,
+            fontSize: 14,
+            fontFamily: "Inter, sans-serif",
+            color: primaryInk,
+            fontWeight: "600",
+            enabled: true,
+          },
+        ]
+      : []),
+  ];
+
+  return {
+    ...baseConfig,
+    borderStyle: baseConfig.borderStyle || "classic_double",
+    borderColor: baseConfig.borderColor || "#2563eb",
+    elements: winnerElements,
+  };
+}
+
+/**
  * Generates N personalized certificate objects from 1 sample certificate template in a single batch.
  */
 export function generateBulkCertificates(
   templateConfig: CertificateConfig,
   recipients: CertificateRecipient[],
-  eventTitle: string
+  eventTitle: string,
+  batchType: CertificateBatchType = "participation"
 ): GeneratedCertificate[] {
   const now = new Date().toISOString();
   const frozenTemplate: CertificateConfig = {
@@ -272,13 +614,54 @@ export function generateBulkCertificates(
   };
 
   return recipients.map((recipient, idx) => ({
-    id: `cert-${recipient.certificateCode}-${idx}`,
+    id: `cert-${batchType}-${recipient.certificateCode}-${idx}`,
     eventId: templateConfig.eventId,
     eventTitle,
-    recipient,
+    batchType,
+    recipient: {
+      ...recipient,
+      certificateType: batchType,
+    },
     generatedAt: now,
     templateSnapshot: frozenTemplate,
   }));
+}
+
+/**
+ * Creates a pre-filled mailto: dispatch link for sending a certificate directly to a
+ * participant or winner's registered email address.
+ */
+export function buildMailtoLink(cert: GeneratedCertificate): string {
+  const isWinner = cert.batchType === "winner";
+  const subject = isWinner
+    ? `🏆 Winner Certificate — ${cert.recipient.leaderboardPlace || cert.recipient.awardRole} (${cert.eventTitle})`
+    : `Certificate of Participation — ${cert.eventTitle}`;
+
+  const verifyUrl = `https://festra.dev/verify/${cert.recipient.certificateCode}`;
+  const bodyLines = [
+    `Dear ${cert.recipient.name},`,
+    "",
+    isWinner
+      ? `Congratulations on securing ${cert.recipient.leaderboardPlace || cert.recipient.awardRole} at ${cert.eventTitle}!`
+      : `Thank you for participating in ${cert.eventTitle}!`,
+    "",
+    `Team: ${cert.recipient.teamName}`,
+    ...(isWinner && cert.recipient.projectTitle
+      ? [`Project Title: ${cert.recipient.projectTitle}`]
+      : []),
+    `Institution: ${cert.recipient.collegeName}`,
+    `Certificate ID: ${cert.recipient.certificateCode}`,
+    `Verification Proof: ${verifyUrl}`,
+    "",
+    "You can view, download, and add this cryptographically verified credential directly to your LinkedIn profile.",
+    "",
+    "Warm regards,",
+    "Event Organizing Committee • Powered by FESTRA",
+  ];
+
+  return `mailto:${encodeURIComponent(cert.recipient.email)}?subject=${encodeURIComponent(
+    subject
+  )}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
 }
 
 /**
@@ -403,6 +786,7 @@ export function buildSample50Recipients(eventId: string): CertificateRecipient[]
     day: "numeric",
     year: "numeric",
   });
+  const uniformRole = "Certificate of Active Participation";
 
   return SAMPLE_50_PARTICIPANT_NAMES.map((p, idx) => {
     const code = `FST-2026-${String(idx + 1).padStart(4, "0")}`;
@@ -413,9 +797,10 @@ export function buildSample50Recipients(eventId: string): CertificateRecipient[]
       email: `${slug}@college.edu`,
       teamName: p.team,
       collegeName: p.college,
-      awardRole: p.award,
+      awardRole: uniformRole,
+      certificateType: "participation",
       certificateCode: code,
-      verificationHash: generateVerificationHash(code, p.name, eventId, p.award),
+      verificationHash: generateVerificationHash(code, p.name, eventId, uniformRole),
       issueDate,
       source: "imported",
     };
@@ -491,10 +876,10 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "event",
           label: "Certificate Title",
-          text: "CERTIFICATE OF ACHIEVEMENT",
+          text: "CERTIFICATE OF PARTICIPATION",
           xPercent: 50,
           yPercent: 25,
-          fontSize: 52,
+          fontSize: 50,
           fontFamily: "'FortniteFont', 'Burbank Big Condensed Black', sans-serif",
           color: "#0f172a",
           fontWeight: "900",
@@ -556,7 +941,7 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "role",
           label: "Achievement / Award",
-          text: "{{award_role}} — {{event_title}}",
+          text: "For Actively Participating in {{event_title}}",
           xPercent: 50,
           yPercent: 62,
           fontSize: 24,
@@ -569,8 +954,8 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           id: "el-meta",
           kind: "text",
           type: "custom_text",
-          label: "Team & Institution Line",
-          text: "Representing {{college_name}} • Squad: {{team_name}}",
+          label: "Citation / Event Description",
+          text: "In recognition of dedication, creativity & active contribution during the event.",
           xPercent: 50,
           yPercent: 69,
           fontSize: 17,
@@ -744,7 +1129,7 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "role",
           label: "Achievement / Award",
-          text: "{{award_role}} in {{event_title}}",
+          text: "For Actively Participating in {{event_title}}",
           xPercent: 50,
           yPercent: 64,
           fontSize: 22,
@@ -757,8 +1142,8 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           id: "el-meta",
           kind: "text",
           type: "custom_text",
-          label: "Team & Institution Line",
-          text: "From {{college_name}} • Team {{team_name}}",
+          label: "Citation / Event Description",
+          text: "In recognition of dedication, creativity & active contribution during the event.",
           xPercent: 50,
           yPercent: 71,
           fontSize: 16,
@@ -900,7 +1285,7 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "role",
           label: "Achievement / Award",
-          text: "{{award_role}} — {{event_title}}",
+          text: "For Actively Participating in {{event_title}}",
           xPercent: 50,
           yPercent: 64,
           fontSize: 22,
@@ -913,8 +1298,8 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           id: "el-meta",
           kind: "text",
           type: "custom_text",
-          label: "Team & Institution Line",
-          text: "{{college_name}}  |  Squad: {{team_name}}",
+          label: "Citation / Event Description",
+          text: "In recognition of dedication, creativity & active contribution during the event.",
           xPercent: 50,
           yPercent: 71,
           fontSize: 16,
@@ -1073,7 +1458,7 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "role",
           label: "Achievement / Award",
-          text: "{{award_role}} — {{event_title}}",
+          text: "For Actively Participating in {{event_title}}",
           xPercent: 50,
           yPercent: 65,
           fontSize: 22,
@@ -1086,8 +1471,8 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           id: "el-meta",
           kind: "text",
           type: "custom_text",
-          label: "Team & Institution Line",
-          text: "{{college_name}} • {{team_name}}",
+          label: "Citation / Event Description",
+          text: "In recognition of dedication, creativity & active contribution during the event.",
           xPercent: 50,
           yPercent: 72,
           fontSize: 16,
@@ -1247,7 +1632,7 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           kind: "text",
           type: "role",
           label: "Achievement / Award",
-          text: "{{award_role}} — {{event_title}}",
+          text: "For Actively Participating in {{event_title}}",
           xPercent: 50,
           yPercent: 63,
           fontSize: 23,
@@ -1260,8 +1645,8 @@ export const CERTIFICATE_TEMPLATES: CertificateTemplatePreset[] = [
           id: "el-meta",
           kind: "text",
           type: "custom_text",
-          label: "Team & Institution Line",
-          text: "{{college_name}} • Squad: {{team_name}}",
+          label: "Citation / Event Description",
+          text: "In recognition of dedication, creativity & active contribution during the event.",
           xPercent: 50,
           yPercent: 70,
           fontSize: 16,
