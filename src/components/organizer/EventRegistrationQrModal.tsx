@@ -216,7 +216,7 @@ export const EventRegistrationQrModal: React.FC<EventRegistrationQrModalProps> =
               GENERATE REGISTRATION QR
             </h2>
             <p className="text-xs text-slate-500">
-              Students scan this QR code with any mobile camera to view tracks and register instantly.
+              Students scan this QR code with any mobile camera to explore all available events, inspect guidelines & schedule, and register.
             </p>
           </div>
 
@@ -497,10 +497,12 @@ export const EventRegistrationQrModal: React.FC<EventRegistrationQrModalProps> =
                     {selectedEvent ? selectedEvent.category.replace("_", " ") : "COLLEGE FEST TRACKS"}
                   </span>
                   <h1 className="font-fortnite text-2xl sm:text-3xl text-blue-950 uppercase tracking-wide leading-tight">
-                    {selectedEvent ? selectedEvent.title : "OFFICIAL EVENT REGISTRATION"}
+                    {selectedEvent ? selectedEvent.title : "CAMPUS EVENTS & REGISTRATION"}
                   </h1>
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-                    {selectedEvent ? selectedEvent.tagline : "Scan the code below to register your team, submit project milestones, and receive instant entry tickets."}
+                    {selectedEvent
+                      ? selectedEvent.tagline
+                      : "Scan with any phone camera to browse available events, view rules & schedules, and register your team."}
                   </p>
                 </div>
 
@@ -517,7 +519,7 @@ export const EventRegistrationQrModal: React.FC<EventRegistrationQrModalProps> =
                     )}
                   </div>
                   <div className="font-fortnite text-sm uppercase tracking-wider text-blue-600">
-                    SCAN WITH ANY PHONE CAMERA TO REGISTER
+                    SCAN WITH ANY PHONE CAMERA TO EXPLORE & REGISTER
                   </div>
                   <div className="text-[10px] font-mono text-slate-400 break-all max-w-sm">
                     {targetUrl}
