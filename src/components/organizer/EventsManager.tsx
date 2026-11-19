@@ -18,6 +18,7 @@ import {
   MapPin,
   Pencil,
   Plus,
+  QrCode,
   Search,
   Ticket,
   Trash2,
@@ -29,11 +30,13 @@ import {
 interface EventsManagerProps {
   onOpenCreate: () => void;
   onEditEvent: (event: Event) => void;
+  onOpenQrModal?: (eventId?: string) => void;
 }
 
 export const EventsManager: React.FC<EventsManagerProps> = ({
   onOpenCreate,
   onEditEvent,
+  onOpenQrModal,
 }) => {
   const {
     events,
@@ -109,7 +112,17 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpenQrModal && (
+              <button
+                onClick={() => onOpenQrModal()}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 font-fortnite text-sm tracking-wide text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition min-h-[38px]"
+              >
+                <QrCode className="h-4 w-4" />
+                <span>REGISTRATION QR</span>
+              </button>
+            )}
+
             <button
               onClick={onOpenCreate}
               className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition min-h-[38px] shadow-sm shadow-blue-500/20"
@@ -202,6 +215,20 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
                   </span>
 
                   <div className="flex items-center gap-1">
+                    {onOpenQrModal && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenQrModal(ev.id);
+                        }}
+                        title="Generate Registration QR Code for this track"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-bold text-slate-700 hover:text-blue-600 hover:border-blue-300 transition"
+                      >
+                        <QrCode className="h-3 w-3" />
+                        <span>QR</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -303,6 +330,16 @@ export const EventsManager: React.FC<EventsManagerProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {onOpenQrModal && (
+            <button
+              onClick={() => onOpenQrModal(openedEvent.id)}
+              className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 font-fortnite text-sm tracking-wide text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition min-h-[38px]"
+            >
+              <QrCode className="h-4 w-4" />
+              <span>EVENT QR PASS</span>
+            </button>
+          )}
+
           <button
             onClick={() => onEditEvent(openedEvent)}
             className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 font-fortnite text-sm tracking-wide text-white hover:bg-blue-700 transition min-h-[38px] shadow-sm shadow-blue-500/20"

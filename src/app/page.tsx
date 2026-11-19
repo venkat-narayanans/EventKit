@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { Event } from "@/types";
 import { Header } from "@/components/Header";
 import { CreateEventModal } from "@/components/organizer/CreateEventModal";
+import { EventRegistrationQrModal } from "@/components/organizer/EventRegistrationQrModal";
 import { EventsManager } from "@/components/organizer/EventsManager";
 import { SubmissionsManager } from "@/components/organizer/SubmissionsManager";
 import { JudgingRubricsStudio } from "@/components/organizer/JudgingRubricsStudio";
@@ -15,9 +16,31 @@ import { StudentPortal } from "@/components/portal/StudentPortal";
 import { LandingPage } from "@/components/landing/LandingPage";
 
 export default function HomePage() {
-  const { viewMode, activeSection } = useStore();
+  const { viewMode, setViewMode, activeSection, setSelectedEventId } = useStore();
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+
+  // QR Modal State
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [qrInitialEventId, setQrInitialEventId] = useState<string | null>(null);
+
+  // Read URL query parameters on initial mount (e.g. ?view=portal&event=hack-ai-2026)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get("view");
+    const eventParam = params.get("event");
+
+    if (viewParam === "portal") {
+      setViewMode("portal");
+    } else if (viewParam === "dashboard") {
+      setViewMode("dashboard");
+    }
+
+    if (eventParam) {
+      setSelectedEventId(eventParam);
+    }
+  }, [setViewMode, setSelectedEventId]);
 
   const openCreateEvent = () => {
     setEditingEvent(null);
@@ -34,13 +57,35 @@ export default function HomePage() {
     setEditingEvent(null);
   };
 
+  const openQrModal = (eventId?: string) => {
+    setQrInitialEventId(eventId || null);
+    setIsQrModalOpen(true);
+  };
+
+  const closeQrModal = () => {
+    setIsQrModalOpen(false);
+    setQrInitialEventId(null);
+  };
+
   if (viewMode === "landing") {
-    return <LandingPage />;
+    return (
+      <>
+        <LandingPage />
+        <EventRegistrationQrModal
+          isOpen={isQrModalOpen}
+          onClose={closeQrModal}
+          initialEventId={qrInitialEventId}
+        />
+      </>
+    );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
-      <Header onOpenCreateEvent={openCreateEvent} />
+      <Header
+        onOpenCreateEvent={openCreateEvent}
+        onOpenQrModal={() => openQrModal()}
+      />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-4">
         {viewMode === "portal" ? (
@@ -51,6 +96,7 @@ export default function HomePage() {
               <EventsManager
                 onOpenCreate={openCreateEvent}
                 onEditEvent={openEditEvent}
+                onOpenQrModal={openQrModal}
               />
             )}
             {activeSection === "submissions" && <SubmissionsManager />}
@@ -66,6 +112,12 @@ export default function HomePage() {
         isOpen={isEventModalOpen}
         onClose={closeEventModal}
         editingEvent={editingEvent}
+      />
+
+      <EventRegistrationQrModal
+        isOpen={isQrModalOpen}
+        onClose={closeQrModal}
+        initialEventId={qrInitialEventId}
       />
     </div>
   );

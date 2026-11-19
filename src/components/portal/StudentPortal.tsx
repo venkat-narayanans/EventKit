@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { TeamMember } from "@/types";
 import {
@@ -48,6 +48,16 @@ export const StudentPortal: React.FC = () => {
   const [subDeck, setSubDeck] = useState("");
   const [subProblem, setSubProblem] = useState("");
   const [isSubSubmitted, setIsSubSubmitted] = useState(false);
+  const [isScannedFromQr, setIsScannedFromQr] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get("view") === "portal" && p.get("event")) {
+        setIsScannedFromQr(true);
+      }
+    }
+  }, []);
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,6 +255,27 @@ export const StudentPortal: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-6 sm:py-8 space-y-6 sm:space-y-8">
+      {/* Scanned QR Pass Welcome Banner */}
+      {isScannedFromQr && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-blue-50/90 px-4 py-3 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm flex-shrink-0">
+              <QrCode className="h-4 w-4" />
+            </div>
+            <span className="text-slate-700 leading-relaxed">
+              Scanned via <strong>QR Pass</strong>: You are viewing registration for{" "}
+              <strong className="text-blue-950">{currentEvent?.title}</strong>. Fill in your squad details to get your digital admit pass!
+            </span>
+          </div>
+          <button
+            onClick={() => setIsScannedFromQr(false)}
+            className="text-slate-400 hover:text-slate-700 font-bold px-2 py-1 text-sm rounded-lg hover:bg-white/60 transition"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Event Track Selector (Touch Friendly Pill Bar) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-blue-100">
         <span className="text-xs font-fortnite uppercase tracking-wide text-slate-500 mr-2 whitespace-nowrap">TRACK:</span>

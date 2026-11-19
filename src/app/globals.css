@@ -70,3 +70,30 @@ body {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Print Rules for A4 Notice Board Poster */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #festra-printable-poster,
+  #festra-printable-poster * {
+    visibility: visible;
+  }
+  #festra-printable-poster {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 32px;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 999999;
+  }
+}

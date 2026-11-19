@@ -12,13 +12,15 @@ import {
   Plus,
   RefreshCw,
   ChevronDown,
+  QrCode,
 } from "lucide-react";
 
 interface HeaderProps {
   onOpenCreateEvent: () => void;
+  onOpenQrModal?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent, onOpenQrModal }) => {
   const {
     viewMode,
     setViewMode,
@@ -118,8 +120,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCreateEvent }) => {
           </button>
         </div>
 
-        {/* Right: Reset Action */}
+        {/* Right: QR Code Pass & Reset Action */}
         <div className="flex items-center gap-1.5">
+          {onOpenQrModal && (
+            <button
+              onClick={onOpenQrModal}
+              title="Generate Student Registration QR Code"
+              className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
+            >
+              <QrCode className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Registration QR</span>
+            </button>
+          )}
+
           <button
             onClick={() => {
               if (confirm("Reset demo data to default clean state?")) {
