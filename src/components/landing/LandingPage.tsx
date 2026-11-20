@@ -17,6 +17,15 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
+import {
+  HeroCommandRadarSvg,
+  Card1QrPassSvg,
+  Card2GitRadarSvg,
+  Card3ZScoreSvg,
+  Card4CertificateSvg,
+  EventPipelineSvg,
+  AmbientFloatingDecor,
+} from "./LandingSvgAnimations";
 
 export const LandingPage: React.FC = () => {
   const { setViewMode, events, selectedEventId } = useStore();
@@ -46,7 +55,7 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
       {/* MINIMAL TOP NAVIGATION */}
       <header className="sticky top-0 z-40 w-full border-b border-blue-100 bg-white/95 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -96,10 +105,13 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* CLEAN MINIMAL HERO SECTION */}
-      <section className="relative px-4 pt-12 sm:pt-20 pb-12 sm:pb-16 max-w-5xl mx-auto text-center space-y-6">
+      {/* CLEAN MINIMAL HERO SECTION WITH HARDWARE-ACCELERATED SVG ANIMATIONS */}
+      <section className="relative px-4 pt-12 sm:pt-16 pb-12 sm:pb-16 max-w-5xl mx-auto text-center space-y-6 overflow-hidden">
+        {/* Ambient Fortnite-Inspired Floating Geometric Tokens */}
+        <AmbientFloatingDecor />
+
         {/* Subtle background ambient blue radial glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-50 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-50/70 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Institution Category Pill */}
         <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/80 px-4 py-1 text-xs font-semibold text-blue-700">
@@ -119,7 +131,7 @@ export const LandingPage: React.FC = () => {
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
           <a
             href="#auth"
             onClick={() => setAuthTab("organizer")}
@@ -137,8 +149,13 @@ export const LandingPage: React.FC = () => {
           </button>
         </div>
 
+        {/* HERO INTERACTIVE SVG SHOWCASE: THE FESTRA LIVE EVENT RADAR */}
+        <div className="pt-4 sm:pt-6">
+          <HeroCommandRadarSvg />
+        </div>
+
         {/* Quick Product Stats Strip */}
-        <div className="pt-8 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center max-w-3xl mx-auto">
+        <div className="pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center max-w-3xl mx-auto">
           <div>
             <div className="text-2xl font-black text-blue-600">100%</div>
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Unified Tool</div>
@@ -158,7 +175,23 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4 CORE PRODUCT PILLARS (Clean Minimal Blue & White Cards) */}
+      {/* LIVE EVENT PIPELINE SHOWCASE (RESPONSIVE SVG ANIMATION) */}
+      <section className="px-4 py-8 max-w-6xl mx-auto space-y-4">
+        <div className="text-center space-y-1.5">
+          <span className="text-[11px] font-fortnite uppercase tracking-wider text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+            END-TO-END EVENT AUTOMATION
+          </span>
+          <h2 className="font-fortnite text-2xl sm:text-3xl text-blue-950 uppercase tracking-wide">
+            FROM QR GATE PASS TO VICTORY CEREMONY
+          </h2>
+          <p className="text-xs text-slate-500 max-w-xl mx-auto">
+            Real-time synchronization across gate check-ins, automated code freeze checks, and verified credentials.
+          </p>
+        </div>
+        <EventPipelineSvg />
+      </section>
+
+      {/* 4 CORE PRODUCT PILLARS (Clean Minimal Blue & White Cards with Animated Micro-SVGs) */}
       <section id="features" className="px-4 py-12 max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
@@ -171,55 +204,67 @@ export const LandingPage: React.FC = () => {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1 */}
-          <div className="rounded-2xl border border-blue-100 bg-white p-6 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <QrCode className="h-5 w-5" />
+          <div className="group rounded-2xl border border-blue-100 bg-white p-5 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="h-24 w-full flex items-center justify-center p-1 rounded-xl bg-blue-50/50 border border-blue-100/60 overflow-hidden">
+                <Card1QrPassSvg />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition">
+                Registrations & Digital Wallet Passes
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Instant squad ticketing with Apple Wallet-grade passes, encrypted QR codes, and bank UTR verification. Zero entrance gate bottlenecks.
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
-              Registrations & Digital Wallet Passes
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Instant squad ticketing with Apple Wallet-grade passes, encrypted QR codes, and bank UTR verification. Zero entrance gate bottlenecks.
-            </p>
+            <div className="text-[11px] font-bold text-blue-600 pt-1">Fast Track Entrance →</div>
           </div>
 
           {/* Card 2 */}
-          <div className="rounded-2xl border border-blue-100 bg-white p-6 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <GitBranch className="h-5 w-5" />
+          <div className="group rounded-2xl border border-blue-100 bg-white p-5 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="h-24 w-full flex items-center justify-center p-1 rounded-xl bg-blue-50/50 border border-blue-100/60 overflow-hidden">
+                <Card2GitRadarSvg />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition">
+                Git Commit Radar & Milestone Auditing
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Enforce 3-stage hackathon progress (Abstract, Prototype, Final Freeze). Analyzes commit cadence to eliminate pre-built zip code dumping.
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
-              Git Commit Radar & Milestone Auditing
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Enforce 3-stage hackathon progress (Abstract, Prototype, Final Freeze). Analyzes commit cadence to eliminate pre-built zip code dumping.
-            </p>
+            <div className="text-[11px] font-bold text-blue-600 pt-1">Anti-Plagiarism Audit →</div>
           </div>
 
           {/* Card 3 */}
-          <div className="rounded-2xl border border-blue-100 bg-white p-6 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <Layers className="h-5 w-5" />
+          <div className="group rounded-2xl border border-blue-100 bg-white p-5 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="h-24 w-full flex items-center justify-center p-1 rounded-xl bg-blue-50/50 border border-blue-100/60 overflow-hidden">
+                <Card3ZScoreSvg />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition">
+                Custom Rubrics & $Z$-Score Normalization
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Design event-specific evaluation criteria. Automated Gaussian $Z$-score normalization neutralizes harsh vs lenient judge grading curves.
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
-              Custom Rubrics & $Z$-Score Normalization
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Design event-specific evaluation criteria. Automated Gaussian $Z$-score normalization neutralizes harsh vs lenient judge grading curves.
-            </p>
+            <div className="text-[11px] font-bold text-blue-600 pt-1">Zero Judge Bias →</div>
           </div>
 
           {/* Card 4 */}
-          <div className="rounded-2xl border border-blue-100 bg-white p-6 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <GraduationCap className="h-5 w-5" />
+          <div className="group rounded-2xl border border-blue-100 bg-white p-5 space-y-3 shadow-sm hover:shadow-md hover:border-blue-300 transition flex flex-col justify-between">
+            <div className="space-y-3">
+              <div className="h-24 w-full flex items-center justify-center p-1 rounded-xl bg-blue-50/50 border border-blue-100/60 overflow-hidden">
+                <Card4CertificateSvg />
+              </div>
+              <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition">
+                BYOD Certificates & NAAC Compliance
+              </h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Upload custom Canva/Figma art with auto-scaling recipient names and LinkedIn proofs. Export IQAC dossiers mapping NAAC Criteria 3.3.2 & 5.3.3.
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900">
-              BYOD Certificates & NAAC Compliance
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Upload custom Canva/Figma art with auto-scaling recipient names and LinkedIn proofs. Export IQAC dossiers mapping NAAC Criteria 3.3.2 & 5.3.3.
-            </p>
+            <div className="text-[11px] font-bold text-blue-600 pt-1">Accreditation Ready →</div>
           </div>
         </div>
       </section>

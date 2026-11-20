@@ -71,6 +71,132 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* =========================================================================
+   HARDWARE-ACCELERATED SVG ANIMATIONS FOR FESTRA THEME (60 FPS, MOBILE-OPTIMIZED)
+   ========================================================================= */
+@keyframes festra-float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1.5deg);
+  }
+}
+
+@keyframes festra-float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(-1.5deg);
+  }
+}
+
+@keyframes festra-pulse-glow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes festra-radar-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes festra-dash-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@keyframes festra-scanline {
+  0% {
+    transform: translateY(-15px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(55px);
+    opacity: 0;
+  }
+}
+
+@keyframes festra-sparkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes festra-beam-travel {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-festra-float {
+  animation: festra-float-slow 5s ease-in-out infinite;
+}
+
+.animate-festra-float-reverse {
+  animation: festra-float-reverse 6s ease-in-out infinite;
+}
+
+.animate-festra-pulse {
+  animation: festra-pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-festra-radar {
+  transform-origin: 320px 180px;
+  animation: festra-radar-rotate 10s linear infinite;
+}
+
+.animate-festra-dash {
+  stroke-dasharray: 6 6;
+  animation: festra-dash-flow 1.5s linear infinite;
+}
+
+.animate-festra-scanline {
+  animation: festra-scanline 2.4s ease-in-out infinite;
+}
+
+.animate-festra-sparkle {
+  animation: festra-sparkle 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-festra-float,
+  .animate-festra-float-reverse,
+  .animate-festra-pulse,
+  .animate-festra-radar,
+  .animate-festra-dash,
+  .animate-festra-scanline,
+  .animate-festra-sparkle {
+    animation: none !important;
+  }
+}
+
 /* Print Rules for A4 Notice Board Poster */
 @media print {
   body {
