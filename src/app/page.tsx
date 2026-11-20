@@ -24,16 +24,22 @@ export default function HomePage() {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [qrInitialEventId, setQrInitialEventId] = useState<string | null>(null);
 
-  // Read URL query parameters on initial mount (e.g. ?view=portal&event=hack-ai-2026)
+  // Read URL query parameters and pathname on initial mount
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const viewParam = params.get("view");
     const eventParam = params.get("event");
+    const path = window.location.pathname.toLowerCase();
 
-    if (viewParam === "portal") {
+    if (viewParam === "portal" || path === "/portal") {
       setViewMode("portal");
-    } else if (viewParam === "dashboard") {
+    } else if (
+      viewParam === "dashboard" ||
+      path === "/dashboard" ||
+      path === "/workspace" ||
+      path === "/organizer"
+    ) {
       setViewMode("dashboard");
     }
 

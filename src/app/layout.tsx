@@ -2,9 +2,29 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FESTRA — Campus Event Operations & Accreditation Platform",
+  title: "FESTRA — Campus Event Operations & Hackathon Platform",
   description:
-    "All-in-one operations platform for college hackathons, technical symposiums, and expos with custom rubrics, verifiable credentials, and 1-click NAAC/NIRF accreditation dossiers.",
+    "The all-in-one operating system for college hackathons, technical symposiums, and paper presentations. Features encrypted QR entrance passes, Git milestone verification, Gaussian Z-score fair judging, 1-click bulk certificate generation, and NAAC IQAC accreditation dossiers.",
+  keywords: [
+    "campus event management",
+    "college hackathon platform",
+    "hackathon judging software",
+    "Z-score score normalization",
+    "NAAC criteria 3.3.2 dossier",
+    "digital admit ticket QR pass",
+    "college tech fest certificates",
+  ],
+  openGraph: {
+    title: "FESTRA — Campus Event Operations & Hackathon Platform",
+    description:
+      "All-in-one operating system for college hackathons, paper symposiums, and tech fests. Automated QR passes, Git milestone audits, fair Z-score judging, and 1-click NAAC dossiers.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FESTRA — Campus Event Operations Platform",
+    description: "The modern operating system for college hackathons and technical fests.",
+  },
 };
 
 export default function RootLayout({
