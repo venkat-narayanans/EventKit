@@ -27,14 +27,13 @@ import {
   Code2,
 } from "lucide-react";
 import {
-  HeroCommandRadarSvg,
   Card1QrPassSvg,
   Card2GitRadarSvg,
   Card3ZScoreSvg,
   Card4CertificateSvg,
   EventPipelineSvg,
-  AmbientFloatingDecor,
 } from "./LandingSvgAnimations";
+import { HeroProductMockup } from "./HeroProductMockup";
 import { LandingInteractiveShowcase } from "./LandingInteractiveShowcase";
 import { LandingCalculator } from "./LandingCalculator";
 
@@ -153,9 +152,9 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-slate-600 uppercase tracking-wide">
-            <a href="#comparison" className="hover:text-blue-600 transition">
-              Comparison
+          <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <a href="#features" className="hover:text-blue-600 transition">
+              Features
             </a>
             <a href="#showcase" className="hover:text-blue-600 transition">
               Live Showcase
@@ -163,11 +162,11 @@ export const LandingPage: React.FC = () => {
             <a href="#how-it-works" className="hover:text-blue-600 transition">
               How It Works
             </a>
-            <a href="#features" className="hover:text-blue-600 transition">
-              Features
+            <a href="#comparison" className="hover:text-blue-600 transition">
+              Comparison
             </a>
             <a href="#calculator" className="hover:text-blue-600 transition">
-              ROI Calculator
+              Calculator
             </a>
             <a href="#faq" className="hover:text-blue-600 transition">
               FAQ
@@ -286,16 +285,13 @@ export const LandingPage: React.FC = () => {
 
       {/* 2. HERO SECTION */}
       <section className="relative px-4 pt-10 sm:pt-16 pb-12 sm:pb-20 max-w-5xl mx-auto text-center space-y-6 overflow-hidden">
-        {/* Ambient Fortnite-Inspired Floating Vector Tokens */}
-        <AmbientFloatingDecor />
-
-        {/* Ambient Blue Radial Glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-50/70 rounded-full blur-3xl pointer-events-none -z-10" />
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-50/60 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* Eyebrow Category Pill */}
-        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/90 px-4 py-1 text-xs font-semibold text-blue-700 shadow-sm">
+        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50/90 px-3.5 py-1 text-xs font-semibold text-blue-700 shadow-xs">
           <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-          <span>FESTRA 2026 • THE CAMPUS EVENT & HACKATHON OPERATING SYSTEM</span>
+          <span>ACCREDITED EVENT INFRASTRUCTURE FOR COLLEGES & UNIVERSITIES</span>
         </div>
 
         {/* Headline in authentic Fortnite Typography */}
@@ -332,9 +328,9 @@ export const LandingPage: React.FC = () => {
           Quick Navigation: Press <kbd className="font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-bold">O</kbd> for Organizer Workspace • <kbd className="font-mono bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-bold">S</kbd> for Student Portal
         </div>
 
-        {/* HERO INTERACTIVE SHOWCASE: LIVE CAMPUS EVENT COMMAND RADAR */}
+        {/* HERO PRODUCT PREVIEW: AUTHENTIC LIVE FESTRA OPERATIONS CONSOLE */}
         <div className="pt-4 sm:pt-6">
-          <HeroCommandRadarSvg />
+          <HeroProductMockup />
         </div>
 
         {/* Quick Verified Metrics Strip */}
